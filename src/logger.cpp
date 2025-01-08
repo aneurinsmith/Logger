@@ -47,7 +47,7 @@ namespace LOG {
 			output = "[FATAL]  ";
 			break;
 		case NONE:
-			output = "         ";
+			output = "";
 			break;
 		}
 
