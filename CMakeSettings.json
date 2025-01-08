@@ -1,0 +1,256 @@
+﻿{
+    "configurations": [
+        {
+            "name": "win32-release-x64",
+            "generator": "Ninja",
+            "configurationType": "Release",
+            "inheritEnvironments": [ "msvc_x64_x64" ],
+            "buildRoot": "${projectDir}\\bin\\win32\\release\\x64",
+            "installRoot": "${projectDir}\\bin\\win32\\release\\x64\\install",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "-v",
+            "ctestCommandArgs": "",
+            "variables": [
+                {
+                    "name": "CMAKE_C_COMPILER",
+                    "value": "C:/msys64/mingw64/bin/clang.exe",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_COMPILER",
+                    "value": "C:/msys64/mingw64/bin/clang++.exe",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_FLAGS",
+                    "value": "-mwindows64",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "win32-release-x86",
+            "generator": "Ninja",
+            "configurationType": "Release",
+            "inheritEnvironments": [ "msvc_x86" ],
+            "buildRoot": "${projectDir}\\bin\\win32\\release\\x86",
+            "installRoot": "${projectDir}\\bin\\win32\\release\\x86\\install",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "-v",
+            "ctestCommandArgs": "",
+            "variables": [
+                {
+                    "name": "CMAKE_C_COMPILER",
+                    "value": "C:/msys64/mingw32/bin/clang.exe",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_COMPILER",
+                    "value": "C:/msys64/mingw32/bin/clang++.exe",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_FLAGS",
+                    "value": "-mwindows32",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "win32-debug-x64",
+            "generator": "Ninja",
+            "configurationType": "Debug",
+            "inheritEnvironments": [ "msvc_x64_x64" ],
+            "buildRoot": "${projectDir}\\bin\\win32\\debug\\x64",
+            "installRoot": "${projectDir}\\bin\\win32\\debug\\x64\\install",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "-v",
+            "ctestCommandArgs": "",
+            "variables": [
+                {
+                    "name": "CMAKE_C_COMPILER",
+                    "value": "C:/msys64/mingw64/bin/clang.exe",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_COMPILER",
+                    "value": "C:/msys64/mingw64/bin/clang++.exe",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_FLAGS",
+                    "value": "-m64",
+                    "type": "STRING"
+                },
+                {
+                    "name": "CMAKE_CXX_FLAGS_DEBUG",
+                    "value": "-g -gcodeview",
+                    "type": "STRING"
+                },
+                {
+                    "name": "CMAKE_EXE_LINKER_FLAGS_DEBUG",
+                    "value": "-fuse-ld=lld -g -Wl,--pdb=",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "win32-debug-x86",
+            "generator": "Ninja",
+            "configurationType": "Debug",
+            "inheritEnvironments": [ "msvc_x86" ],
+            "buildRoot": "${projectDir}\\bin\\win32\\debug\\x86",
+            "installRoot": "${projectDir}\\bin\\win32\\debug\\x86\\install",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "-v",
+            "ctestCommandArgs": "",
+            "variables": [
+                {
+                    "name": "CMAKE_C_COMPILER",
+                    "value": "C:/msys64/mingw32/bin/clang.exe",
+                    "type": "STRING"
+                },
+                {
+                    "name": "CMAKE_CXX_COMPILER",
+                    "value": "C:/msys64/mingw32/bin/clang++.exe",
+                    "type": "STRING"
+                },
+                {
+                    "name": "CMAKE_CXX_FLAGS",
+                    "value": "-m32",
+                    "type": "STRING"
+                },
+                {
+                    "name": "CMAKE_CXX_FLAGS_DEBUG",
+                    "value": "-g -gcodeview",
+                    "type": "STRING"
+                },
+                {
+                    "name": "CMAKE_EXE_LINKER_FLAGS_DEBUG",
+                    "value": "-fuse-ld=lld -g -Wl,--pdb=",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "linux-release-x64",
+            "generator": "Ninja",
+            "configurationType": "Release",
+            "inheritEnvironments": [ "linux_x64" ],
+            "buildRoot": "${projectDir}\\bin\\linux\\release\\x64",
+            "installRoot": "${projectDir}\\bin\\linux\\release\\x64\\install",
+            "cmakeExecutable": "cmake",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "-v",
+            "ctestCommandArgs": "",
+            "wslPath": "${defaultWSLPath}",
+            "variables": [
+                {
+                    "name": "CMAKE_C_COMPILER",
+                    "value": "/usr/bin/clang",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_COMPILER",
+                    "value": "/usr/bin/clang++",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_FLAGS",
+                    "value": "-m64",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "linux-release-x86",
+            "generator": "Ninja",
+            "configurationType": "Release",
+            "inheritEnvironments": [ "linux_x86" ],
+            "buildRoot": "${projectDir}\\bin\\linux\\release\\x86",
+            "installRoot": "${projectDir}\\bin\\linux\\release\\x86\\install",
+            "cmakeExecutable": "cmake",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "-v",
+            "ctestCommandArgs": "",
+            "wslPath": "${defaultWSLPath}",
+            "variables": [
+                {
+                    "name": "CMAKE_C_COMPILER",
+                    "value": "/usr/bin/clang",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_COMPILER",
+                    "value": "/usr/bin/clang++",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_FLAGS",
+                    "value": "-m32",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "linux-debug-x64",
+            "generator": "Ninja",
+            "configurationType": "Debug",
+            "inheritEnvironments": [ "linux_x64" ],
+            "buildRoot": "${projectDir}\\bin\\linux\\debug\\x64",
+            "installRoot": "${projectDir}\\bin\\linux\\debug\\x64\\install",
+            "cmakeExecutable": "cmake",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "-v",
+            "ctestCommandArgs": "",
+            "wslPath": "${defaultWSLPath}",
+            "variables": [
+                {
+                    "name": "CMAKE_C_COMPILER",
+                    "value": "/usr/bin/clang",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_COMPILER",
+                    "value": "/usr/bin/clang++",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_FLAGS",
+                    "value": "-m64",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "linux-debug-x86",
+            "generator": "Ninja",
+            "configurationType": "Debug",
+            "inheritEnvironments": [ "linux_x86" ],
+            "buildRoot": "${projectDir}\\bin\\linux\\debug\\x86",
+            "installRoot": "${projectDir}\\bin\\linux\\debug\\x86\\install",
+            "cmakeExecutable": "cmake",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "-v",
+            "ctestCommandArgs": "",
+            "wslPath": "${defaultWSLPath}",
+            "variables": [
+                {
+                    "name": "CMAKE_C_COMPILER",
+                    "value": "/usr/bin/clang",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_COMPILER",
+                    "value": "/usr/bin/clang++",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_FLAGS",
+                    "value": "-m32",
+                    "type": "STRING"
+                }
+            ]
+        }
+    ]
+}
