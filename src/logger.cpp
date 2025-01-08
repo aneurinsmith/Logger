@@ -1,13 +1,11 @@
 ﻿
 #include "logger.h"
-#include "tools/chrono.h"
-
-using namespace std;
 
 namespace LOG 
 {
-	Logger::Logger() 
-		: m_lvl(NONE) {};
+	Logger::Logger() : 
+		m_lvl(TRACE),
+		m_fmt("%Y/%m/%d %H:%M:%S.%f") {};
 
 	Logger& Logger::instance() {
 		static Logger s_logger;
@@ -18,37 +16,54 @@ namespace LOG
 		m_lvl = lvl;
 	}
 
-	void Logger::print(string msg) {
+	void Logger::set_format(std::string fmt) {
+		m_fmt = fmt;
+	}
+
+	void Logger::print(std::string msg) {
 		print(m_lvl, msg);
 	}
 
-	void Logger::print(Level lvl, string msg) {
-		stringstream stream;
+	void Logger::print(Level lvl, std::string msg) {
+		std::string fmt = m_fmt;
+
+		size_t pos = fmt.find("%f");
+		if (pos != std::string::npos) {
+			auto now = std::chrono::system_clock::now();
+			auto ms = std::to_string((now.time_since_epoch().count() / 1000000) % 1000);
+			if (ms.length() < 3) {
+				ms = (std::string(3 - ms.length(), '0') + ms);
+			}
+			fmt.replace(pos, 2, ms);
+		}
+
+		std::time_t t = time(nullptr);
+		std::tm tm = *localtime(&t);
+		std::cout << std::put_time(&tm, fmt.c_str()) << " ";
 
 		switch (lvl) {
 		case TRACE :
-			stream << "[TRACE]  ";
+			std::cout << "[TRACE]  ";
 			break;
 		case DEBUG:
-			stream << "[DEBUG]  ";
+			std::cout << "[DEBUG]  ";
 			break;
 		case INFO:
-			stream << " [INFO]  ";
+			std::cout << "[INFO]   ";
 			break;
 		case WARN:
-			stream << " [WARN]  ";
+			std::cout << "[WARN]   ";
 			break;
 		case ERROR:
-			stream << "[ERROR]  ";
+			std::cout << "[ERROR]  ";
 			break;
 		case FATAL:
-			stream << "[FATAL]  ";
+			std::cout << "[FATAL]  ";
 			break;
-		default:
-			stream << "";
+		case NONE:
+			break;
 		}
 
-		stream << msg;
-		printf("%s\n", stream.str().c_str());
+		std::cout << msg << std::endl;
 	}
 }

@@ -2,6 +2,10 @@
 #pragma once
 #include <string>
 #include <sstream>
+#include <iostream>
+#include <chrono>
+#include <ctime>  
+#include <iomanip>
 
 enum Level {
 	NONE,
@@ -24,12 +28,14 @@ namespace LOG
 		static Logger& instance();
 
 		void set_level(Level lvl);
+		void set_format(std::string fmt);
 
 		void print(std::string msg);
 		void print(Level lvl, std::string msg);
 
 	private:
 		Level m_lvl;
+		std::string m_fmt;
 	};
 
 	inline void set_level(Level lvl) {
