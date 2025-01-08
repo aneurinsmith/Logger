@@ -16,9 +16,6 @@ namespace LOG {
 	void Logger::set_level(Level lvl) {
 		m_lvl = lvl;
 	}
-	Level Logger::get_level() {
-		return m_lvl;
-	}
 
 	void Logger::print(string msg) {
 		print(m_lvl, msg);

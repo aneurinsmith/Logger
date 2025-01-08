@@ -16,6 +16,9 @@ int main() {
 
     LOG::set_level(DEBUG);
     LOG::print("Print");
+    LOG::print("Print");
+    LOG::set_level(INFO);
+    LOG::print("Print");
     LOG::print(NONE, "");
 
     LOG::trace("Trace");

@@ -21,7 +21,6 @@ namespace LOG {
 		static Logger& instance();
 
 		void set_level(Level lvl);
-		Level get_level();
 
 		void print(std::string msg);
 		void print(Level lvl, std::string msg);
@@ -34,7 +33,7 @@ namespace LOG {
 		Logger::instance().set_level(lvl);
 	}
 	inline void print(std::string msg) {
-		Logger::instance().print(Logger::instance().get_level(), msg);
+		Logger::instance().print(msg);
 	}
 	inline void print(Level lvl, std::string msg) {
 		Logger::instance().print(lvl, msg);
