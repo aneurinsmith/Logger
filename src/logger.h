@@ -1,6 +1,7 @@
 ﻿
 #pragma once
 #include <string>
+#include <sstream>
 
 enum Level {
 	NONE,

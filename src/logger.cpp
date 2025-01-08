@@ -22,34 +22,31 @@ namespace LOG {
 	}
 
 	void Logger::print(Level lvl, string msg) {
-		string output;
+		stringstream stream;
 
 		switch (lvl) {
 		case TRACE :
-			output = "[TRACE]  ";
+			stream << "[TRACE]  ";
 			break;
 		case DEBUG:
-			output = "[DEBUG]  ";
+			stream << "[DEBUG]  ";
 			break;
 		case INFO:
-			output = " [INFO]  ";
+			stream << " [INFO]  ";
 			break;
 		case WARN:
-			output = " [WARN]  ";
+			stream << " [WARN]  ";
 			break;
 		case ERROR:
-			output = "[ERROR]  ";
+			stream << "[ERROR]  ";
 			break;
 		case FATAL:
-			output = "[FATAL]  ";
-			break;
-		case NONE:
-			output = "";
+			stream << "[FATAL]  ";
 			break;
 		}
 
-		output.append(msg);
-		printf("%s\n", output.c_str());
+		stream << msg;
+		printf("%s\n", stream.str().c_str());
 	}
 
 }
