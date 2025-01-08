@@ -13,8 +13,10 @@ enum Level {
 	FATAL
 };
 
-namespace LOG {
-	class Logger {
+namespace LOG 
+{
+	class Logger 
+	{
 	public:
 
 		Logger();

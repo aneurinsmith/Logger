@@ -1,10 +1,11 @@
 ﻿
 #include "logger.h"
+#include "tools/chrono.h"
 
 using namespace std;
 
-namespace LOG {
-
+namespace LOG 
+{
 	Logger::Logger() 
 		: m_lvl(NONE) {};
 
@@ -43,10 +44,11 @@ namespace LOG {
 		case FATAL:
 			stream << "[FATAL]  ";
 			break;
+		default:
+			stream << "";
 		}
 
 		stream << msg;
 		printf("%s\n", stream.str().c_str());
 	}
-
 }
