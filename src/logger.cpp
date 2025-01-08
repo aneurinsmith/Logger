@@ -29,22 +29,25 @@ namespace LOG {
 
 		switch (lvl) {
 		case TRACE :
-			output = "[trace] ";
+			output = "[TRACE]  ";
 			break;
 		case DEBUG:
-			output = "[debug] ";
+			output = "[DEBUG]  ";
 			break;
 		case INFO:
-			output = "[info] ";
+			output = " [INFO]  ";
 			break;
 		case WARN:
-			output = "[warn] ";
+			output = " [WARN]  ";
 			break;
 		case ERROR:
-			output = "[error] ";
+			output = "[ERROR]  ";
 			break;
 		case FATAL:
-			output = "[fatal] ";
+			output = "[FATAL]  ";
+			break;
+		case NONE:
+			output = "         ";
 			break;
 		}
 
