@@ -30,6 +30,9 @@ namespace LOG {
 		Level m_lvl;
 	};
 
+	inline void set_level(Level lvl) {
+		Logger::instance().set_level(lvl);
+	}
 	inline void print(std::string msg) {
 		Logger::instance().print(Logger::instance().get_level(), msg);
 	}

@@ -7,12 +7,16 @@ LOG::Logger logger;
 int main() {
     logger.set_level(TRACE);
     logger.print("Hello World!");
-    LOG::print("");
+    LOG::print(NONE, "");
 
     LOG::print("Print");
     LOG::trace("Trace");
     LOG::print("Print");
-    LOG::print("");
+    LOG::print(NONE, "");
+
+    LOG::set_level(DEBUG);
+    LOG::print("Print");
+    LOG::print(NONE, "");
 
     LOG::trace("Trace");
     LOG::debug("Debug");
