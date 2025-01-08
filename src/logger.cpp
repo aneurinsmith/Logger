@@ -25,10 +25,9 @@ namespace LOG {
 	}
 
 	void Logger::print(Level lvl, string msg) {
-		m_lvl = lvl;
 		string output;
 
-		switch (m_lvl) {
+		switch (lvl) {
 		case TRACE :
 			output = "[trace] ";
 			break;
