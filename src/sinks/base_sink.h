@@ -1,14 +1,17 @@
 
 #pragma once
-#include <string>
 
-enum Level :int;
-class basesink {
+enum Level:int;
+class basesink 
+{
 public:
 
-	virtual void set_level(const Level) = 0;
-	virtual void print(const Level, std::string msg) = 0;
+	void set_level(const Level lvl) {
+		m_lvl = lvl;
+	}
+	virtual void print(Level lvl, std::string msg) = 0;
 
 protected:
 	Level m_lvl;
+	std::string m_fmt;
 };
