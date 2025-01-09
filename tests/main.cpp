@@ -3,8 +3,8 @@
 
 LOG::Logger logger;
 
-int main() {
-
+int main() 
+{
     logger.add_sink(LOG::oStreamSink());
     LOG::set_level(NONE);
 
