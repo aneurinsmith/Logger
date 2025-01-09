@@ -3,33 +3,37 @@
 
 namespace LOG 
 {
-	Logger::Logger() :
-		m_fmt("%Y/%m/%d %H:%M:%S.%f") {
+	Logger::Logger() : m_fmt("%Y/%m/%d %H:%M:%S.%f") 
+	{
 		m_lvl = DEBUG;
 	}
 
-	Logger::Logger(std::string fmt) :
-		m_fmt(fmt) {
+	Logger::Logger(std::string fmt) : m_fmt(fmt) 
+	{
 		m_lvl = DEBUG;
 	}
 
-	Logger& Logger::instance() {
+	Logger& Logger::instance() 
+	{
 		static Logger s_logger;
 		return s_logger;
 	}
 
-	void Logger::set_level(Level lvl) {
+	void Logger::set_level(Level lvl) 
+	{
 		m_lvl = lvl;
 		for (auto& sink : sinks) {
 			sink->set_level(lvl);
 		}
 	}
 
-	void Logger::set_format(std::string fmt) {
+	void Logger::set_format(std::string fmt) 
+	{
 		m_fmt = fmt;
 	}
 
-	void Logger::print(Level lvl, std::string msg) {
+	void Logger::print(Level lvl, std::string msg) 
+	{
 
 		std::stringstream stream;
 		std::string fmt = m_fmt;
@@ -67,7 +71,8 @@ namespace LOG
 		}
 	}
 
-	void Logger::add_sink(std::shared_ptr<basesink> sink) {
+	void Logger::add_sink(std::shared_ptr<basesink> sink) 
+	{
 		sinks.push_back(sink);
 		Logger::instance().sinks.push_back(sink);
 	}

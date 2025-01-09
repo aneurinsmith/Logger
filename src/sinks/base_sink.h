@@ -6,9 +6,7 @@ class basesink
 {
 public:
 
-	void set_level(const Level lvl) {
-		m_lvl = lvl;
-	}
+	void set_level(const Level lvl) { m_lvl = lvl; }
 	virtual void print(Level lvl, std::string msg) = 0;
 
 protected:
