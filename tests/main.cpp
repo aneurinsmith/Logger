@@ -5,21 +5,11 @@
 LOG::Logger logger;
 
 int main() {
-    logger.set_level(TRACE);
-    logger.print("Hello World!");
-    LOG::print(NONE, "");
+    logger.add_sink(LOG::oStreamSink());
+    LOG::set_level(NONE);
 
-    LOG::print("Print");
     LOG::trace("Trace");
-    LOG::print("Print");
-    LOG::print(NONE, "");
-
-    LOG::set_level(DEBUG);
-    LOG::print("Print");
-    LOG::print("Print");
-    LOG::set_level(INFO);
-    LOG::print("Print");
-    LOG::print(NONE, "");
+    LOG::print("");
 
     LOG::trace("Trace");
     LOG::debug("Debug");
