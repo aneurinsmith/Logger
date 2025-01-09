@@ -3,19 +3,23 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <vector>
+#include <memory>
 
 #include <chrono>
 #include <ctime>  
 #include <iomanip>
 
-enum Level {
+#include "sinks/ostream_sink.h"
+
+enum Level: int {
 	NONE,
 	TRACE,
 	DEBUG,
 	INFO,
 	WARN,
 	ERROR,
-	FATAL
+	FATAL,
 };
 
 namespace LOG 
@@ -25,25 +29,29 @@ namespace LOG
 	public:
 
 		Logger();
+		Logger(std::string fmt);
 
 		static Logger& instance();
 
 		void set_level(Level lvl);
 		void set_format(std::string fmt);
 
-		void print(std::string msg);
 		void print(Level lvl, std::string msg);
 
-	private:
-		Level m_lvl;
+		void add_sink(std::shared_ptr<basesink> sink);
+
+	protected:
+		std::vector<std::shared_ptr<basesink>> sinks;
 		std::string m_fmt;
+		Level m_lvl;
 	};
+
 
 	inline void set_level(Level lvl) {
 		Logger::instance().set_level(lvl);
 	}
 	inline void print(std::string msg) {
-		Logger::instance().print(msg);
+		Logger::instance().print(NONE, msg);
 	}
 	inline void print(Level lvl, std::string msg) {
 		Logger::instance().print(lvl, msg);
@@ -65,5 +73,10 @@ namespace LOG
 	}
 	inline void fatal(std::string msg) {
 		Logger::instance().print(FATAL, msg);
+	}
+
+	inline std::shared_ptr<OStreamSink> oStreamSink() {
+		auto sink = std::make_shared<OStreamSink>();
+		return sink;
 	}
 }
