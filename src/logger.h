@@ -12,7 +12,8 @@
 
 #include "sinks/ostream_sink.h"
 
-enum Level: int {
+enum Level: int 
+{
 	NONE,
 	TRACE,
 	DEBUG,
