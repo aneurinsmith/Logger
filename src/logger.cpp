@@ -53,8 +53,8 @@ namespace LOG
 		switch (lvl) {
 		case TRACE: stream << "[TRACE]  "; break;
 		case DEBUG: stream << "[DEBUG]  "; break;
-		case INFO:  stream << "[INFO]   "; break;
-		case WARN:  stream << "[WARN]   "; break;
+		case INFO:  stream << " [INFO]  "; break;
+		case WARN:  stream << " [WARN]  "; break;
 		case ERROR: stream << "[ERROR]  "; break;
 		case FATAL: stream << "[FATAL]  "; break;
 		case NONE: break;
