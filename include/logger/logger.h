@@ -4,8 +4,8 @@
 #include <memory>
 #include <vector>
 
-#include "sinks/ostream_sink.h"
-#include "sinks/terminal_sink.h"
+#include "ostream_sink.h"
+#include "terminal_sink.h"
 
 namespace LOG 
 {

@@ -9,4 +9,3 @@ namespace LOG
 		if (lvl >= m_lvl) std::cout << msg << std::endl;;
 	}
 }
-

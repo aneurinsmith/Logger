@@ -3,6 +3,8 @@ cmake_minimum_required (VERSION 3.8)
 project (Logger)
 set(CMAKE_CXX_STANDARD 11)
 
+include_directories("include/logger" "src")
+
 # Attempt to detect the platform
 if(NOT PLATFORM)
 	if(WIN32)
@@ -17,4 +19,4 @@ endif()
 file(GLOB_RECURSE logger_src "src/*.h" "src/*.cpp")
 add_library (logger STATIC ${logger_src})
 
-add_subdirectory(tests)
+add_subdirectory(test)
