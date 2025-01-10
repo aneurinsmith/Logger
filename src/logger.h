@@ -7,19 +7,19 @@
 #include "sinks/ostream_sink.h"
 #include "sinks/terminal_sink.h"
 
-enum Level: int 
-{
-	NONE,
-	TRACE,
-	DEBUG,
-	INFO,
-	WARN,
-	ERROR,
-	FATAL,
-};
-
 namespace LOG 
 {
+	enum Level : int
+	{
+		NONE,
+		TRACE,
+		DEBUG,
+		INFO,
+		WARN,
+		ERROR,
+		FATAL,
+	};
+
 	class Logger 
 	{
 	public:
@@ -29,19 +29,18 @@ namespace LOG
 
 		static Logger& instance();
 
-		void set_level(Level lvl);
+		void set_level(LOG::Level lvl);
 		void set_format(std::string fmt);
 
-		void print(Level lvl, std::string msg);
+		void print(LOG::Level lvl, std::string msg);
 
 		void add_sink(std::shared_ptr<basesink> sink);
 
 	protected:
 		std::vector<std::shared_ptr<basesink>> sinks;
 		std::string m_fmt;
-		Level m_lvl;
+		LOG::Level m_lvl;
 	};
-
 
 	inline void set_level(Level lvl) 
 	{

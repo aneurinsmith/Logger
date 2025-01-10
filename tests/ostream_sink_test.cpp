@@ -6,7 +6,7 @@ LOG::Logger logger;
 int main() 
 {
     logger.add_sink(LOG::oStreamSink());
-    LOG::set_level(NONE);
+    LOG::set_level(LOG::NONE);
 
     LOG::trace("Trace");
     LOG::print("");

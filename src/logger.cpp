@@ -17,7 +17,7 @@ namespace LOG
 		return s_logger;
 	}
 
-	void Logger::set_level(Level lvl) 
+	void Logger::set_level(LOG::Level lvl) 
 	{
 		m_lvl = lvl;
 		for (auto& sink : sinks) {
@@ -30,7 +30,7 @@ namespace LOG
 		m_fmt = fmt;
 	}
 
-	void Logger::print(Level lvl, std::string msg) 
+	void Logger::print(LOG::Level lvl, std::string msg) 
 	{
 
 		std::stringstream stream;
@@ -53,13 +53,13 @@ namespace LOG
 		}
 
 		switch (lvl) {
-		case TRACE: stream << "[TRACE]  "; break;
-		case DEBUG: stream << "[DEBUG]  "; break;
-		case INFO:  stream << " [INFO]  "; break;
-		case WARN:  stream << " [WARN]  "; break;
-		case ERROR: stream << "[ERROR]  "; break;
-		case FATAL: stream << "[FATAL]  "; break;
-		case NONE: break;
+		case LOG::TRACE: stream << "[TRACE]  "; break;
+		case LOG::DEBUG: stream << "[DEBUG]  "; break;
+		case LOG::INFO:  stream << " [INFO]  "; break;
+		case LOG::WARN:  stream << " [WARN]  "; break;
+		case LOG::ERROR: stream << "[ERROR]  "; break;
+		case LOG::FATAL: stream << "[FATAL]  "; break;
+		case LOG::NONE: break;
 		}
 
 		stream << msg;
