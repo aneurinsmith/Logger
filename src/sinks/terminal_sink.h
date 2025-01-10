@@ -10,7 +10,7 @@ namespace LOG
 	{
 	public:
 
-		void print(Level lvl, std::string msg)
+		void print(LOG::Level lvl, std::string msg)
 		{
 			std::cout << msg << std::endl;
 		}

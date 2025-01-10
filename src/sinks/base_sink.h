@@ -8,14 +8,14 @@ namespace LOG
 	{
 	public:
 
-		void set_level(const Level lvl)
+		void set_level(const LOG::Level lvl)
 		{
 			m_lvl = lvl;
 		}
-		virtual void print(Level lvl, std::string msg) = 0;
+		virtual void print(LOG::Level lvl, std::string msg) = 0;
 
 	protected:
-		Level m_lvl;
+		LOG::Level m_lvl;
 		std::string m_fmt;
 	};
 }
