@@ -64,7 +64,7 @@ namespace LOG
 		case NONE: break;
 		}
 
-		stream << msg << std::endl;
+		stream << msg;
 
 		for (auto& sink : sinks) {
 			sink->print(lvl, stream.str());

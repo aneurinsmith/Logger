@@ -9,7 +9,7 @@ public:
 
 	void print(Level lvl, std::string msg) 
 	{
-		if(lvl >= m_lvl) std::cout << msg;
+		if (lvl >= m_lvl) std::cout << msg << std::endl;;
 	}
 
 };
