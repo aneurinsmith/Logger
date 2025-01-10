@@ -2,14 +2,24 @@
 #pragma once
 #include "base_sink.h"
 #include <iostream>
+#include <queue>
 
-class TerminalSink : public basesink
+namespace LOG
 {
-public:
-
-	void print(Level lvl, std::string msg)
+	class TerminalSink : public basesink
 	{
-		std::cout << msg << std::endl;
-	}
+	public:
 
-};
+		void print(Level lvl, std::string msg)
+		{
+			std::cout << msg << std::endl;
+		}
+
+	};
+
+	inline std::shared_ptr<TerminalSink> terminalSink()
+	{
+		auto sink = std::make_shared<TerminalSink>();
+		return sink;
+	}
+}

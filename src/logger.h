@@ -80,14 +80,4 @@ namespace LOG
 		Logger::instance().print(FATAL, msg);
 	}
 
-	inline std::shared_ptr<OStreamSink> oStreamSink() 
-	{
-		auto sink = std::make_shared<OStreamSink>();
-		return sink;
-	}
-	inline std::shared_ptr<TerminalSink> terminalSink ()
-	{
-		auto sink = std::make_shared<TerminalSink> ();
-		return sink;
-	}
 }

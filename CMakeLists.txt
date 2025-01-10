@@ -11,6 +11,7 @@ if(NOT PLATFORM)
 		set(PLATFORM "x11")
 	endif()
 	message("-- Platform detected (${PLATFORM})")
+	add_compile_definitions(${PLATFORM})
 endif()
 
 file(GLOB_RECURSE logger_src "src/*.h" "src/*.cpp")

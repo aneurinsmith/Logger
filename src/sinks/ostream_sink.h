@@ -3,13 +3,22 @@
 #include "base_sink.h"
 #include <iostream>
 
-class OStreamSink : public basesink
+namespace LOG
 {
-public:
-
-	void print(Level lvl, std::string msg) 
+	class OStreamSink : public basesink
 	{
-		if (lvl >= m_lvl) std::cout << msg << std::endl;;
-	}
+	public:
 
-};
+		void print(Level lvl, std::string msg)
+		{
+			if (lvl >= m_lvl) std::cout << msg << std::endl;;
+		}
+
+	};
+
+	inline std::shared_ptr<OStreamSink> oStreamSink()
+	{
+		auto sink = std::make_shared<OStreamSink>();
+		return sink;
+	}
+}
