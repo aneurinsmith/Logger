@@ -32,7 +32,6 @@ namespace LOG
 
 	void Logger::print(LOG::Level lvl, std::string msg) 
 	{
-
 		std::stringstream stream;
 		std::string fmt = m_fmt;
 
