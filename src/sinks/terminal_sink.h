@@ -1,8 +1,6 @@
 
 #pragma once
 #include "base_sink.h"
-#include <iostream>
-#include <queue>
 
 namespace LOG
 {
@@ -10,10 +8,7 @@ namespace LOG
 	{
 	public:
 
-		void print(LOG::Level lvl, std::string msg)
-		{
-			std::cout << msg << std::endl;
-		}
+		void print(LOG::Level lvl, std::string msg);
 
 	};
 

@@ -1,7 +1,6 @@
 
 #pragma once
 #include "base_sink.h"
-#include <iostream>
 
 namespace LOG
 {
@@ -9,10 +8,7 @@ namespace LOG
 	{
 	public:
 
-		void print(LOG::Level lvl, std::string msg)
-		{
-			if (lvl >= m_lvl) std::cout << msg << std::endl;;
-		}
+		void print(LOG::Level lvl, std::string msg);
 
 	};
 
