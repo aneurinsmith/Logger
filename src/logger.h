@@ -11,6 +11,7 @@
 #include <iomanip>
 
 #include "sinks/ostream_sink.h"
+#include "sinks/terminal_sink.h"
 
 enum Level: int 
 {
@@ -88,6 +89,11 @@ namespace LOG
 	inline std::shared_ptr<OStreamSink> oStreamSink() 
 	{
 		auto sink = std::make_shared<OStreamSink>();
+		return sink;
+	}
+	inline std::shared_ptr<TerminalSink> terminalSink ()
+	{
+		auto sink = std::make_shared<TerminalSink> ();
 		return sink;
 	}
 }
