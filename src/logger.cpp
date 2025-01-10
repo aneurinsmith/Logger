@@ -8,15 +8,8 @@
 
 namespace LOG 
 {
-	Logger::Logger() : m_fmt("%Y/%m/%d %H:%M:%S.%f") 
-	{
-		m_lvl = DEBUG;
-	}
-
-	Logger::Logger(std::string fmt) : m_fmt(fmt) 
-	{
-		m_lvl = DEBUG;
-	}
+	Logger::Logger() : m_fmt("%Y/%m/%d %H:%M:%S.%f") {}
+	Logger::Logger(std::string fmt) : m_fmt(fmt) {}
 
 	Logger& Logger::instance() 
 	{
