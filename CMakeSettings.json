@@ -79,7 +79,7 @@
                 },
                 {
                     "name": "CMAKE_CXX_FLAGS",
-                    "value": "-m64",
+                    "value": "-m64 -Wno-unused-command-line-argument",
                     "type": "STRING"
                 },
                 {
@@ -117,7 +117,7 @@
                 },
                 {
                     "name": "CMAKE_CXX_FLAGS",
-                    "value": "-m32",
+                    "value": "-m32 -Wno-unused-command-line-argument",
                     "type": "STRING"
                 },
                 {
