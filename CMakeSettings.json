@@ -79,12 +79,12 @@
                 },
                 {
                     "name": "CMAKE_CXX_FLAGS",
-                    "value": "-m64 -Wno-unused-command-line-argument",
+                    "value": "-m64",
                     "type": "STRING"
                 },
                 {
                     "name": "CMAKE_CXX_FLAGS_DEBUG",
-                    "value": "-g -gcodeview",
+                    "value": "-g -gcodeview -Wno-unused-command-line-argument",
                     "type": "STRING"
                 },
                 {
@@ -117,12 +117,12 @@
                 },
                 {
                     "name": "CMAKE_CXX_FLAGS",
-                    "value": "-m32 -Wno-unused-command-line-argument",
+                    "value": "-m32",
                     "type": "STRING"
                 },
                 {
                     "name": "CMAKE_CXX_FLAGS_DEBUG",
-                    "value": "-g -gcodeview",
+                    "value": "-g -gcodeview -Wno-unused-command-line-argument",
                     "type": "STRING"
                 },
                 {
