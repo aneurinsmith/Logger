@@ -89,7 +89,7 @@
                 },
                 {
                     "name": "CMAKE_EXE_LINKER_FLAGS_DEBUG",
-                    "value": "-fuse-ld=lld -g -Wl,--pdb=",
+                    "value": "-fuse-ld=lld -Wl,--pdb=",
                     "type": "STRING"
                 }
             ]
@@ -127,7 +127,7 @@
                 },
                 {
                     "name": "CMAKE_EXE_LINKER_FLAGS_DEBUG",
-                    "value": "-fuse-ld=lld -g -Wl,--pdb=",
+                    "value": "-fuse-ld=lld -Wl,--pdb=",
                     "type": "STRING"
                 }
             ]
