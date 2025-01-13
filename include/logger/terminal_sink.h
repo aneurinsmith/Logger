@@ -8,8 +8,7 @@ namespace LOG
 	class TerminalSink : public basesink
 	{
 	public:
-
-		TerminalSink();
+		TerminalSink(LOG::Level lvl, std::string fmt);
 
 	protected:
 		void write(std::string msg);
@@ -18,9 +17,9 @@ namespace LOG
 		void* m_pipe;
 	};
 
-	inline std::shared_ptr<TerminalSink> terminalSink()
+	inline std::shared_ptr<TerminalSink> terminalSink(LOG::Level lvl = (Level)0, std::string fmt = "%Y/%m/%d %H:%M:%S.%f")
 	{
-		auto sink = std::make_shared<TerminalSink>();
+		auto sink = std::make_shared<TerminalSink>(lvl, fmt);
 		return sink;
 	}
 }

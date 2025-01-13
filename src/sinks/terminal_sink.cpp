@@ -11,7 +11,7 @@
 
 namespace LOG
 {
-	TerminalSink::TerminalSink()
+	TerminalSink::TerminalSink(LOG::Level lvl, std::string fmt) : basesink(lvl, fmt)
 	{
 	#ifdef win32
 
