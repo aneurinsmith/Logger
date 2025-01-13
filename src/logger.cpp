@@ -44,8 +44,6 @@ namespace LOG
 
 	void Logger::add_sink(std::shared_ptr<basesink> sink) 
 	{
-		sink->set_format(m_fmt);
-		sink->set_level(m_lvl);
 		sinks.push_back(sink);
 		Logger::instance().sinks.push_back(sink);
 	}
