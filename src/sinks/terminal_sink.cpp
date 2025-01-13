@@ -17,10 +17,8 @@ namespace LOG
 
 		std::string name = "cmdpipe";
 		name += std::to_string(std::rand() % 101);
-		std::cout << name << std::endl;
 
 		std::string pipe = "\\\\.\\pipe\\" + name;
-		std::cout << pipe << std::endl;
 
 		DWORD dwWritten;
 		m_pipe = CreateNamedPipeA(
