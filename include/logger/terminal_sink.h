@@ -2,7 +2,6 @@
 #pragma once
 #include "base_sink.h"
 #include <memory>
-#include <thread>
 
 namespace LOG
 {
