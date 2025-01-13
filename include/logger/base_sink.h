@@ -7,6 +7,7 @@ namespace LOG
 	enum Level :int;
 	class basesink
 	{
+		friend class Logger;
 	public:
 
 		void set_level(const LOG::Level lvl)
