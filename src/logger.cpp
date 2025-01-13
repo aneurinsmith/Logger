@@ -46,6 +46,7 @@ namespace LOG
 				fmt.replace(pos, 2, ms);
 			}
 
+
 			std::time_t t = time(nullptr);
 			std::tm tm = *localtime(&t);
 			stream << std::put_time(&tm, fmt.c_str()) << " ";
@@ -63,8 +64,10 @@ namespace LOG
 
 		stream << msg;
 
-		for (auto& sink : sinks) {
-			sink->print(lvl, stream.str());
+		for (std::shared_ptr<basesink> sink : sinks) {
+			if (lvl >= sink->m_lvl) {
+				sink->print(lvl, stream.str());
+			}
 		}
 	}
 
