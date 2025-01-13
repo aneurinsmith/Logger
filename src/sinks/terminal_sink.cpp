@@ -35,7 +35,7 @@ namespace LOG
 
 		if (m_pipe != INVALID_HANDLE_VALUE) {
 			STARTUPINFO si = { sizeof(si) };
-			si.lpTitle = "Debugger";
+			si.lpTitle = (LPSTR)"Debugger";
 			PROCESS_INFORMATION pi;
 
 			std::string command = "/c powershell -Command \""
