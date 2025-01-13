@@ -2,6 +2,7 @@
 #pragma once
 #include "base_sink.h"
 #include <memory>
+#include <thread>
 
 namespace LOG
 {
@@ -9,8 +10,12 @@ namespace LOG
 	{
 	public:
 
+		TerminalSink();
+
 		void print(LOG::Level lvl, std::string msg);
 
+	private:
+		void* m_pipe;
 	};
 
 	inline std::shared_ptr<TerminalSink> terminalSink()
