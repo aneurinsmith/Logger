@@ -11,7 +11,8 @@ namespace LOG
 
 		TerminalSink();
 
-		void print(LOG::Level lvl, std::string msg);
+	protected:
+		void write(std::string msg);
 
 	private:
 		void* m_pipe;

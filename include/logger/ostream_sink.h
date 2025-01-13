@@ -7,9 +7,8 @@ namespace LOG
 {
 	class OStreamSink : public basesink
 	{
-	public:
-
-		void print(LOG::Level lvl, std::string msg);
+	protected:
+		void write(std::string msg);
 
 	};
 

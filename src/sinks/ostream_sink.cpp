@@ -4,7 +4,7 @@
 
 namespace LOG
 {
-	void OStreamSink::print(LOG::Level lvl, std::string msg)
+	void OStreamSink::write(std::string msg)
 	{
 		std::cout << msg << std::endl;;
 	}

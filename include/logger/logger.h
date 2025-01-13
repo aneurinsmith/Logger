@@ -9,23 +9,13 @@
 
 namespace LOG 
 {
-	enum Level : int
-	{
-		NONE,
-		TRACE,
-		DEBUG,
-		INFO,
-		WARN,
-		ERROR,
-		FATAL,
-	};
-
+	enum Level : int;
 	class Logger 
 	{
 	public:
 
-		Logger();
-		Logger(std::string fmt);
+		Logger(LOG::Level lvl = (Level)0, std::string fmt = "%Y/%m/%d %H:%M:%S.%f");
+		Logger(std::shared_ptr<basesink> sink, LOG::Level lvl = (Level)0, std::string fmt = "%Y/%m/%d %H:%M:%S.%f");
 
 		static Logger& instance();
 

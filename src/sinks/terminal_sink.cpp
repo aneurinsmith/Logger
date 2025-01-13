@@ -53,7 +53,7 @@ namespace LOG
 	#endif
 	}
 
-	void TerminalSink::print(LOG::Level lvl, std::string msg)
+	void TerminalSink::write(std::string msg)
 	{
 	#ifdef win32
 		msg += "\n";
