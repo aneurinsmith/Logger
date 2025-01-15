@@ -4,7 +4,6 @@ project (Logger)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-include(GNUInstallDirs)
 include_directories("include/logger")
 
 # Attempt to detect the platform
@@ -26,22 +25,18 @@ add_library (logger STATIC ${logger_src})
 add_subdirectory(test)
 
 
-# Install library
-target_include_directories(logger
-    PUBLIC
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+# Package
+install(TARGETS logger EXPORT loggerTargets
+	LIBRARY DESTINATION "lib"
+	ARCHIVE DESTINATION "lib"
+	RUNTIME DESTINATION "bin"
+	INCLUDES DESTINATION "include"
 )
-install(TARGETS logger
-    EXPORT loggerTargets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+install(DIRECTORY "include/logger"
+	DESTINATION "include"
 )
-install(DIRECTORY "include/logger" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT loggerTargets
-    FILE loggerTargets.cmake
-    NAMESPACE LOG::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/logger
+	FILE loggerTargets.cmake
+	NAMESPACE Logger::
+	DESTINATION "cmake/logger"
 )
