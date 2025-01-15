@@ -14,7 +14,7 @@ if(NOT PLATFORM)
 	elseif(UNIX AND NOT APPLE)
 		set(PLATFORM "x11")
 	endif()
-	message("-- Platform detected (${PLATFORM})")
+	message(STATUS "Platform detected (${PLATFORM})")
 	add_compile_definitions(${PLATFORM})
 endif()
 
@@ -24,6 +24,7 @@ add_library (logger STATIC ${logger_src})
 
 # Create the test executables
 add_subdirectory(test)
+
 
 # Install library
 target_include_directories(logger
