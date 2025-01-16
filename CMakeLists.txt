@@ -9,7 +9,7 @@ include_directories("include/logger")
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(LOGGER_VERSION 0.0.0)
+set(LOGGER_VERSION 0.1.0)
 set(LOGGER_PACKAGE_DIR "${CMAKE_INSTALL_DATADIR}/logger/cmake")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
@@ -70,12 +70,6 @@ write_basic_package_version_file(
 # Export package config
 export(TARGETS logger
 	FILE "${LOGGER_PACKAGE_DIR}/loggerConfig.cmake"
-	NAMESPACE Logger::
-)
-
-# Install package config
-install(EXPORT loggerTargets
-	DESTINATION "${CMAKE_INSTALL_DATADIR}/logger/cmake"
 	NAMESPACE Logger::
 )
 
