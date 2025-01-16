@@ -15,4 +15,4 @@ jobs:
 
     - name: Create ZIP file
       run: |
-        zip -r project.zip src include
+        zip -r project.zip src include CMakeLists.txt
