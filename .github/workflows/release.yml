@@ -16,3 +16,10 @@ jobs:
     - name: Create ZIP file
       run: |
         zip -r project.zip src include CMakeLists.txt
+
+    - name: Add ZIP file to release
+      uses: svenstaro/upload-release-action@v2
+      with: 
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: project.zip
+        tag: ${{ github.ref }}
