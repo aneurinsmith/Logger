@@ -16,9 +16,9 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 
-##########################
-#	PLATFORM DETECTION	 #
-##########################
+#----------------------#
+#  PLATFORM DETECTION  #
+#----------------------#
 if(NOT PLATFORM)
 	if(WIN32)
 		set(PLATFORM "win32")
@@ -30,9 +30,9 @@ if(NOT PLATFORM)
 endif()
 
 
-##########################
-#	 LIBRARY CREATION	 #
-##########################
+#--------------------#
+#  LIBRARY CREATION  #
+#--------------------#
 file(GLOB_RECURSE logger_src "src/*.cpp")
 add_library (logger STATIC ${logger_src})
 target_include_directories(logger PUBLIC
@@ -41,9 +41,9 @@ target_include_directories(logger PUBLIC
 )
 
 
-#############################
-#	  INSTALLATION RULES	#
-#############################
+#----------------------#
+#  INSTALLATION RULES  #
+#----------------------#
 install(TARGETS logger EXPORT loggerTargets
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -56,9 +56,9 @@ install(
 )
 
 
-##############################
-#	CONFIG FILE GENERATION	 #
-##############################
+#--------------------------#
+#  CONFIG FILE GENERATION  #
+#--------------------------#
 
 # Create package version file
 write_basic_package_version_file(
@@ -82,9 +82,9 @@ install(EXPORT loggerTargets
 message(STATUS "Package files written to: ${LOGGER_PACKAGE_DIR}")
 
 
-#########################
-#  EXAMPLE EXECUTABLES	#
-#########################
+#-----------------------#
+#  EXAMPLE EXECUTABLES  #
+#-----------------------#
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
 	add_subdirectory(test)
 endif()
