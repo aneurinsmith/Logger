@@ -26,6 +26,10 @@ add_library (logger STATIC ${logger_src})
 add_subdirectory(test)
 
 
+target_include_directories(logger PUBLIC 
+	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger>"
+)
+
 # Package
 install(TARGETS logger EXPORT loggerTargets
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
