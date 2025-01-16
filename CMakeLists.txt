@@ -80,5 +80,5 @@ message(STATUS "Package files written to: ${LOGGER_PACKAGE_DIR}")
 #  EXAMPLE EXECUTABLES  #
 #-----------------------#
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-	add_subdirectory(test)
+	add_subdirectory("examples")
 endif()
