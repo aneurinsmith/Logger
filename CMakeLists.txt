@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(LOGGER_VERSION 0.0.0)
 set(LOGGER_PACKAGE_DIR "${CMAKE_INSTALL_DATADIR}/logger/cmake")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
@@ -34,6 +35,10 @@ endif()
 ##########################
 file(GLOB_RECURSE logger_src "src/*.cpp")
 add_library (logger STATIC ${logger_src})
+target_include_directories(logger PUBLIC
+	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger>"
+	"$<INSTALL_INTERFACE:include/logger>"
+)
 
 
 #############################
