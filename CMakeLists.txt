@@ -37,8 +37,7 @@ file(GLOB_RECURSE logger_src "src/*.cpp")
 add_library (logger STATIC ${logger_src})
 target_include_directories(logger PUBLIC
 	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger>"
-	"$<INSTALL_INTERFACE:include/logger>"
-)
+	"$<INSTALL_INTERFACE:include/logger>")
 
 
 #----------------------#
@@ -48,32 +47,23 @@ install(TARGETS logger EXPORT loggerTargets
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
+	INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(
 	DIRECTORY "include/logger"
-	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 
 #--------------------------#
 #  CONFIG FILE GENERATION  #
 #--------------------------#
-
-# Create package version file
 write_basic_package_version_file(
 	"${LOGGER_PACKAGE_DIR}/loggerConfigVersion.cmake"
 	VERSION ${LOGGER_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
-
-# Export package config
+	COMPATIBILITY AnyNewerVersion)
 export(TARGETS logger
 	FILE "${LOGGER_PACKAGE_DIR}/loggerConfig.cmake"
-	NAMESPACE Logger::
-)
-
-message(STATUS "Package files written to: ${LOGGER_PACKAGE_DIR}")
+	NAMESPACE Logger::)
+message(VERBOSE "Package files written to: ${LOGGER_PACKAGE_DIR}")
 
 
 #-----------------------#
