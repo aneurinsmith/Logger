@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "fstream_sink.h"
 #include "ostream_sink.h"
 #include "terminal_sink.h"
 
