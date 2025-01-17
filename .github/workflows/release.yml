@@ -14,7 +14,7 @@ jobs:
 
     - name: Create ZIP file
       run: |
-        zip -r logger-src.zip src include CMakeLists.txt
+        zip -r logger-src.zip src include config CMakeLists.txt
 
     - name: Add ZIP file to release
       uses: svenstaro/upload-release-action@v2
