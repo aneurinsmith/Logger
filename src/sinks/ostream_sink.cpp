@@ -6,6 +6,6 @@ namespace LOG
 {
 	void OStreamSink::write(std::string msg)
 	{
-		std::cout << msg << std::endl;;
+		std::cout << msg << std::endl;
 	}
 }
