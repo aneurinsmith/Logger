@@ -1,9 +1,5 @@
 
 @PACKAGE_INIT@
 
-
-add_library(Logger::logger STATIC IMPORTED)
-
-set_target_properties(Logger::logger PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES "@PACKAGE_logger_INCLUDEDIR@"
-)
+include("${CMAKE_CURRENT_LIST_DIR}/loggerTargets.cmake")
+check_required_components(logger)
