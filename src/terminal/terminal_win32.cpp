@@ -1,7 +1,9 @@
 
 #ifdef win32
 #include "terminal.h"
+
 #include <windows.h>
+#include <commctrl.h>
 #include <stdexcept>
 #include <iostream>
 
@@ -9,11 +11,6 @@
 
 namespace LOG
 {
-	static LRESULT CALLBACK HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm)
-	{
-		return DefWindowProc(wnd, msg, wpm, lpm);
-	}
-
 	Terminal::Terminal()
 	{
 		is_running = true;
@@ -25,6 +22,59 @@ namespace LOG
 		is_running = false;
 		thread_handle.join();
 	}
+
+
+
+	static LRESULT CALLBACK HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm)
+	{
+		switch (msg) {
+			case WM_CREATE: {
+
+				RECT rect;
+				GetClientRect(wnd, &rect);
+
+				HWND edit = CreateWindowEx(
+					LVS_EX_DOUBLEBUFFER,
+					(LPCSTR)"EDIT",
+					NULL,
+					WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,
+					0, 0, rect.right - rect.left, rect.bottom - rect.top,
+					wnd,
+					NULL,
+					(HINSTANCE)GetWindowLongPtr(wnd, GWLP_HINSTANCE),
+					NULL
+				);
+
+				int length = GetWindowTextLength(edit);
+				SendMessage(edit, EM_SETSEL, length, length);
+				SendMessage(edit, EM_REPLACESEL, TRUE, (LPARAM)"Hello World!\n");
+
+				HFONT hf;
+				hf = CreateFont(18, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, CLIP_DEFAULT_PRECIS, 0, CLEARTYPE_QUALITY, FF_DONTCARE, (LPCSTR)"Consolas");
+				SendMessage(edit, WM_SETFONT, (LPARAM)hf, true);
+				SetWindowLongPtr(wnd, GWLP_USERDATA, (LONG_PTR)edit);
+
+				break;
+			}
+			case WM_SIZE: {
+				HWND edit = (HWND)GetWindowLongPtr(wnd, GWLP_USERDATA);
+				SetWindowPos(edit, 0, 0, 0, LOWORD(lpm), HIWORD(lpm), SWP_NOZORDER);
+
+				RECT rect;
+				SendMessage(edit, EM_GETRECT, 0, (LPARAM)&rect);
+				rect.left += 10;
+				rect.top += 10;
+				rect.right -= 10;
+				rect.bottom -= 10;
+				SendMessage(edit, EM_SETRECT, 0, (LPARAM)&rect);
+
+				break;
+			}
+		}
+		return DefWindowProc(wnd, msg, wpm, lpm);
+	}
+
+
 
 	void Terminal::ThreadEntry(void* _data)
 	{
@@ -50,7 +100,7 @@ namespace LOG
 		data->window_handle = CreateWindowExW(0, WINDOW_CLASS, WINDOW_CLASS, WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 			CW_USEDEFAULT, CW_USEDEFAULT,
 			600, 400,
-			0, (HMENU)0, GetModuleHandleW(NULL), 0);
+			0, (HMENU)0, GetModuleHandleW(NULL), _data);
 		if (!data->window_handle) {
 			throw std::runtime_error("Window creation failed");
 		}

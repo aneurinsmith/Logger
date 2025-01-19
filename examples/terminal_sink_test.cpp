@@ -11,7 +11,7 @@ int main()
 
     logger.print(LOG::TRACE, "Terminal window message");
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::seconds(10));
 
     return 0;
 }
