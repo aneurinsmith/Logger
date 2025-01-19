@@ -1,4 +1,6 @@
 
+#include <thread>
+
 namespace LOG
 {
 	class Terminal
@@ -9,7 +11,11 @@ namespace LOG
 		~Terminal();
 
 	private:
-		void* thread_handle;
+		static void ThreadEntry(void* data);
+
+		bool is_running;
+		std::thread thread_handle;
 		void* window_handle;
+
 	};
 }
