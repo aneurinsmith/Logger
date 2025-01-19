@@ -1,6 +1,7 @@
 
 #pragma once
 #include "base_sink.h"
+#include "terminal.h"
 #include <memory>
 
 namespace LOG
@@ -14,7 +15,7 @@ namespace LOG
 		void write(std::string msg);
 
 	private:
-		void* m_pipe;
+		Terminal terminal;
 	};
 
 	inline std::shared_ptr<TerminalSink> terminalSink(LOG::Level lvl = (Level)0, std::string fmt = "%Y/%m/%d %H:%M:%S.%f")

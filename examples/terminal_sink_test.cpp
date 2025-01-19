@@ -1,18 +1,13 @@
 
 #include <logger.h>
 
-LOG::Logger logger(LOG::oStreamSink());
+LOG::Logger logger;
 
 int main()
 {
-    logger.add_sink(LOG::terminalSink(LOG::DEBUG));
-    logger.add_sink(LOG::terminalSink(LOG::WARN));
+    logger.add_sink(LOG::terminalSink(LOG::NONE));
 
-    logger.print(LOG::TRACE, "Neither terminal sink should receive this message");
-    logger.print(LOG::DEBUG, "The debug level terminal will recieve this message");
-    logger.print(LOG::WARN, "Both sinks will recieve this message, sent by the logger");
-
-    LOG::warn("Both sinks will recieve this message, sent by an inline fucntion");
+    logger.print(LOG::TRACE, "Terminal window message");
 
     return 0;
 }
