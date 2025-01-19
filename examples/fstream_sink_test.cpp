@@ -1,7 +1,7 @@
 
 #include <logger.h>
 
-LOG::Logger logger;
+LOG::Logger logger(LOG::oStreamSink());
 
 int main()
 {
