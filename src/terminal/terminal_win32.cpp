@@ -11,20 +11,6 @@
 
 namespace LOG
 {
-	Terminal::Terminal()
-	{
-		is_running = true;
-		thread_handle = std::thread(&Terminal::ThreadEntry, this);
-	}
-
-	Terminal::~Terminal()
-	{
-		is_running = false;
-		thread_handle.join();
-	}
-
-
-
 	static LRESULT CALLBACK HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm)
 	{
 		switch (msg) {
@@ -37,17 +23,13 @@ namespace LOG
 					LVS_EX_DOUBLEBUFFER,
 					(LPCSTR)"EDIT",
 					NULL,
-					WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,
+					WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
 					0, 0, rect.right - rect.left, rect.bottom - rect.top,
 					wnd,
 					NULL,
 					(HINSTANCE)GetWindowLongPtr(wnd, GWLP_HINSTANCE),
 					NULL
 				);
-
-				int length = GetWindowTextLength(edit);
-				SendMessage(edit, EM_SETSEL, length, length);
-				SendMessage(edit, EM_REPLACESEL, TRUE, (LPARAM)"Hello World!\n");
 
 				HFONT hf;
 				hf = CreateFont(18, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, CLIP_DEFAULT_PRECIS, 0, CLEARTYPE_QUALITY, FF_DONTCARE, (LPCSTR)"Consolas");
@@ -70,8 +52,33 @@ namespace LOG
 
 				break;
 			}
+			case WM_SETTEXT: {
+				HWND edit = (HWND)GetWindowLongPtr(wnd, GWLP_USERDATA);
+
+				int length = GetWindowTextLength(edit);
+				SendMessage(edit, EM_SETSEL, length, length);
+
+				std::string m((const char*)wpm);
+				m += "\r\n";
+				SendMessage(edit, EM_REPLACESEL, TRUE, (LPARAM)m.c_str());
+			}
 		}
+
 		return DefWindowProc(wnd, msg, wpm, lpm);
+	}
+
+
+
+	Terminal::Terminal()
+	{
+		is_running = true;
+		thread_handle = std::thread(&Terminal::ThreadEntry, this);
+	}
+
+	Terminal::~Terminal()
+	{
+		is_running = false;
+		thread_handle.join();
 	}
 
 
@@ -100,7 +107,7 @@ namespace LOG
 		data->window_handle = CreateWindowExW(0, WINDOW_CLASS, WINDOW_CLASS, WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 			CW_USEDEFAULT, CW_USEDEFAULT,
 			600, 400,
-			0, (HMENU)0, GetModuleHandleW(NULL), _data);
+			0, (HMENU)0, GetModuleHandleW(NULL), (void*)data);
 		if (!data->window_handle) {
 			throw std::runtime_error("Window creation failed");
 		}
@@ -108,10 +115,12 @@ namespace LOG
         MSG msg = {};
 		while (data->is_running) {
 			if (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)) {
-
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
-
+			}
+			else if (!data->q.empty()) {
+				std::string m = data->dequeue();
+				SendMessageA((HWND)data->window_handle, WM_SETTEXT, (WPARAM)m.c_str(), 0);
 			}
 		}
 	}

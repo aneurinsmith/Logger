@@ -18,6 +18,6 @@ namespace LOG
 
 	void TerminalSink::write(std::string msg)
 	{
-
+		terminal.enqueue(msg);
 	}
 }
