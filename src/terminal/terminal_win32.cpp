@@ -69,11 +69,15 @@ namespace LOG
 					m += data->dequeue();
 					m += "\r\n";
 				}
+				if (m.size() > 30000) {
+					m.erase(0, m.size() - 30000);
+				}
 
 				SendMessageA((HWND)data->output_handle, WM_SETREDRAW, FALSE, NULL);
 				LockWindowUpdate((HWND)data->output_handle);
 
 				int length = GetWindowTextLength((HWND)data->output_handle);
+
 				if (length + m.size() > 30000) {
 					SendMessage((HWND)data->output_handle, EM_SETSEL, 0, m.size());
 					SendMessage((HWND)data->output_handle, EM_REPLACESEL, TRUE, (LPARAM)"");
