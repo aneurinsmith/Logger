@@ -64,15 +64,17 @@ namespace LOG
 				DispatchMessage(&msg);
 			}
 			else if (!data->q.empty()) {
+				std::string m = "";
+				while (!data->q.empty()) {
+					m += data->dequeue();
+					m += "\r\n";
+				}
+
 				SendMessageA((HWND)data->output_handle, WM_SETREDRAW, FALSE, NULL);
 				LockWindowUpdate((HWND)data->output_handle);
 
-				std::string m = data->dequeue();
-				m += "\r\n";
-
 				int length = GetWindowTextLength((HWND)data->output_handle);
 				if (length + m.size() > 30000) {
-					std::cout << length << std::endl;
 					SendMessage((HWND)data->output_handle, EM_SETSEL, 0, m.size());
 					SendMessage((HWND)data->output_handle, EM_REPLACESEL, TRUE, (LPARAM)"");
 				}
