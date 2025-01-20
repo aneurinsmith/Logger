@@ -129,14 +129,6 @@ namespace LOG
 			case WM_SIZE: {
 				SetWindowPos((HWND)data->output_handle, 0, 0, 0, LOWORD(lpm), HIWORD(lpm), SWP_NOZORDER);
 
-				RECT rect;
-				SendMessage((HWND)data->output_handle, EM_GETRECT, 0, (LPARAM)&rect);
-				rect.left += 10;
-				rect.top += 10;
-				rect.right -= 10;
-				rect.bottom -= 10;
-				SendMessage((HWND)data->output_handle, EM_SETRECT, 0, (LPARAM)&rect);
-
 				break;
 			}
 		}

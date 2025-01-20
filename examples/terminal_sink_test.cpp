@@ -9,7 +9,7 @@ int main()
 {
     logger.add_sink(LOG::terminalSink(LOG::NONE));
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10000; i++) {
         std::string msg = "Terminal window message ";
         msg += std::to_string(i);
         logger.print(LOG::TRACE, msg);
