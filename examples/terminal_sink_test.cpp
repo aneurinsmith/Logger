@@ -9,8 +9,11 @@ int main()
 {
     logger.add_sink(LOG::terminalSink(LOG::NONE));
 
-    logger.print(LOG::TRACE, "Terminal window message 1");
-    logger.print(LOG::TRACE, "Terminal window message 2");
+    for (int i = 0; i < 1000; i++) {
+        std::string msg = "Terminal window message ";
+        msg += std::to_string(i);
+        logger.print(LOG::TRACE, msg);
+    }
 
     std::this_thread::sleep_for(std::chrono::seconds(10));
 

@@ -1,10 +1,16 @@
 
+#pragma once
 #include <thread>
 #include <queue>
 #include <mutex>
 #include <condition_variable>
 #include <string>
 #include <iostream>
+
+#ifdef win32
+#include <windows.h>
+#undef ERROR
+#endif
 
 namespace LOG
 {
@@ -20,8 +26,12 @@ namespace LOG
 			q.push(msg);
 		}
 
-	private:
+	protected:
 		static void ThreadEntry(void* data);
+
+	#ifdef win32
+		static LRESULT CALLBACK HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm);
+	#endif
 
 		bool is_running;
 		std::thread thread_handle;
