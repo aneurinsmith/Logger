@@ -8,6 +8,10 @@
 #include <chrono>
 #include <cstdint>
 #include <iostream>
+#include <algorithm>
+
+using std::max;
+using std::min;
 
 #define WINDOW_CLASS (LPCWSTR)"terminal_logger"
 
@@ -52,10 +56,9 @@ namespace LOG
 			}
 		}
 
-		data->window_handle = CreateWindowExW(
-			WS_EX_COMPOSITED, 
+		data->window_handle = CreateWindowExW(0,
 			WINDOW_CLASS, WINDOW_CLASS, 
-			WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+			WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_VSCROLL,
 			CW_USEDEFAULT, CW_USEDEFAULT,
 			600, 400,
 			0, (HMENU)0, GetModuleHandleW(NULL), (void*)data);
@@ -79,67 +82,6 @@ namespace LOG
 	void Terminal::MessageThread(void* _data)
 	{
 		Terminal* data = (Terminal*)_data;
-
-		while (data->is_running) {
-			std::unique_lock<std::mutex> lk(data->m);
-			data->cv.wait(lk, [data] {return !data->q.empty(); });
-
-			if (!data->q.empty()) {
-				std::string m = "";
-				while (!data->q.empty()) {
-					m += data->dequeue();
-					m += "\r\n";
-				}
-				if (m.size() > data->buffer_size) {
-					m.erase(0, m.size() - data->buffer_size);
-				}
-
-				SendMessageA((HWND)data->output_handle, WM_SETREDRAW, FALSE, NULL);
-				LockWindowUpdate((HWND)data->output_handle);
-
-				int length = GetWindowTextLength((HWND)data->output_handle);
-
-				if (length + m.size() > data->buffer_size) {
-					SendMessageA((HWND)data->output_handle, EM_SETSEL, 0, m.size());
-					SendMessageA((HWND)data->output_handle, EM_REPLACESEL, TRUE, (LPARAM)"");
-				}
-
-				SendMessageA((HWND)data->output_handle, EM_SETSEL, length, length);
-				SendMessageA((HWND)data->output_handle, EM_REPLACESEL, TRUE, (LPARAM)m.c_str());
-				SendMessageA((HWND)data->output_handle, EM_SCROLL, SB_BOTTOM, 0);
-
-				LockWindowUpdate(NULL);
-				SendMessageA((HWND)data->output_handle, WM_SETREDRAW, TRUE, NULL);
-
-
-				/*
-				int i = 0;
-				while (!data->q.empty()) {
-					std::string m = "";
-					m += data->dequeue();
-					m += "\r\n";
-
-					if (strlen(buffer) + m.size() > bufferSize) {
-						size_t excessLength = strlen(buffer) + m.size() + 2 - bufferSize;
-						memmove(buffer, buffer + excessLength, bufferSize - excessLength);
-						buffer[bufferSize - excessLength] = '\0';
-					}
-
-					strncat(buffer, m.c_str(), bufferSize - strlen(buffer) - 1);
-				}
-
-				SendMessageA((HWND)data->output_handle, WM_SETREDRAW, FALSE, 0);
-				LockWindowUpdate((HWND)data->output_handle);
-
-				SetWindowTextA((HWND)data->output_handle, buffer);
-				SendMessageA((HWND)data->output_handle, EM_SCROLL, SB_BOTTOM, 0);
-
-				LockWindowUpdate(NULL);
-				SendMessageA((HWND)data->output_handle, WM_SETREDRAW, TRUE, 0);
-				*/
-			}
-
-		}
 	}
 
 
@@ -147,12 +89,12 @@ namespace LOG
 	LRESULT Terminal::HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm)
 	{
 		Terminal* data = reinterpret_cast<Terminal*>(::GetWindowLongPtr(wnd, GWLP_USERDATA));
-		static HDC hdcMem = NULL;
-		static HBITMAP hBitmap = NULL;
 
 		switch (msg) {
+			case WM_ERASEBKGND: {
+				return TRUE;
+			}
 			case WM_NCCREATE: {
-
 				data = static_cast<Terminal*>(reinterpret_cast<LPCREATESTRUCT>(lpm)->lpCreateParams);
 				SetWindowLongPtrA(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(data));
 
@@ -160,33 +102,94 @@ namespace LOG
 			}
 			case WM_CREATE: {
 
-				RECT rect;
-				GetClientRect(wnd, &rect);
-
-				data->output_handle = CreateWindowExA(
-					WS_EX_TRANSPARENT,
-					(LPCSTR)"EDIT",
-					NULL,
-					WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
-					0, 0, rect.right - rect.left, rect.bottom - rect.top,
-					wnd,
-					NULL,
-					(HINSTANCE)GetWindowLongPtr(wnd, GWLP_HINSTANCE),
-					NULL
-				);
-
-				HFONT hf;
-				hf = CreateFontA(18, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, CLIP_DEFAULT_PRECIS, 0, CLEARTYPE_QUALITY, FF_DONTCARE, (LPCSTR)"Consolas");
-				SendMessageA((HWND)data->output_handle, WM_SETFONT, (LPARAM)hf, true);
-				SendMessageA((HWND)data->output_handle, EM_SETLIMITTEXT, data->buffer_size, 0);
-
 				break;
 			}
 			case WM_SIZE: {
-				SetWindowPos((HWND)data->output_handle, 0, 0, 0, LOWORD(lpm), HIWORD(lpm), SWP_NOZORDER);
-				SendMessageA((HWND)data->output_handle, EM_SCROLLCARET, 0, 0);
+				InvalidateRect(wnd, NULL, true);
+
+				RECT rc;
+				GetClientRect(wnd, &rc);
+
+				SCROLLINFO si;
+				si.cbSize = sizeof(SCROLLINFO);
+				si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
+				si.nMin = 0;
+				si.nMax = data->MAX_QUEUE - (rc.bottom / 18);
+				si.nPage = 1;
+				si.nPos = GetScrollPos(wnd, SB_VERT);
+				SetScrollInfo(wnd, SB_VERT, &si, TRUE);
 
 				break;
+			}
+			case WM_VSCROLL: {
+				int sp = GetScrollPos(wnd, SB_VERT);
+
+				switch (LOWORD(wpm)) {
+				case SB_LINEUP:
+					sp = max(0, sp - 1);
+					break;
+				case SB_LINEDOWN:
+					sp = min(data->MAX_QUEUE, sp + 1);
+					break;
+				case SB_THUMBTRACK:
+				case SB_THUMBPOSITION:
+					sp = HIWORD(wpm);
+					break;
+				}
+				SetScrollPos(wnd, SB_VERT, sp, TRUE);
+				InvalidateRect(wnd, NULL, TRUE);
+
+				break;
+			}
+			case WM_MOUSEWHEEL: {
+
+				int delta = GET_WHEEL_DELTA_WPARAM(wpm);
+				int sp = GetScrollPos(wnd, SB_VERT);
+
+				if (delta > 0) {
+					sp = max(0, sp - 1);
+				}
+				else if (delta < 0) {
+					sp = min(data->MAX_QUEUE, sp + 1);
+				}
+				SetScrollPos(wnd, SB_VERT, sp, TRUE);
+				InvalidateRect(wnd, NULL, TRUE);
+
+				return 0;
+			}
+			case WM_PAINT: {
+
+				PAINTSTRUCT ps;
+				HDC hdc = BeginPaint(wnd, &ps);
+				HDC memDC = CreateCompatibleDC(hdc);
+				HBITMAP memBM = CreateCompatibleBitmap(hdc, ps.rcPaint.right, ps.rcPaint.bottom);
+				SelectObject(memDC, memBM);
+
+				// Set background
+				HBRUSH brush = CreateSolidBrush(0x0C0C0C);
+				FillRect(memDC, &ps.rcPaint, brush);
+
+				// Create font
+				HFONT hf = CreateFontA(18, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, CLIP_DEFAULT_PRECIS, 0, CLEARTYPE_QUALITY, FF_DONTCARE, (LPCSTR)"Consolas");
+				SelectObject(memDC, hf);
+
+				RECT rc;
+				rc.left = ps.rcPaint.left;
+				rc.right = ps.rcPaint.right;
+				rc.bottom = ps.rcPaint.bottom;
+				rc.top = ps.rcPaint.top - (GetScrollPos(wnd, SB_VERT) * 18);
+
+				// Draw text
+				DrawTextA(memDC, (LPCSTR)data->get_msgs().c_str(), -1, &rc, DT_WORDBREAK | DT_EDITCONTROL | DT_LEFT | DT_BOTTOM);
+
+				// Swap buffers
+				BitBlt(hdc, 0, 0, ps.rcPaint.right, ps.rcPaint.bottom, memDC, 0, 0, SRCCOPY);
+				EndPaint(wnd, &ps);
+
+				DeleteDC(memDC);
+				DeleteObject(memBM);
+
+				return FALSE;
 			}
 		}
 

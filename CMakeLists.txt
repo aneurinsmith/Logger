@@ -17,6 +17,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 
 
+
 #----------------------#
 #  PLATFORM DETECTION  #
 #----------------------#
@@ -45,6 +46,8 @@ target_include_directories(logger INTERFACE
 	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger>"
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/logger>"
 )
+
+target_link_libraries(logger -lcomctl32)
 
 
 

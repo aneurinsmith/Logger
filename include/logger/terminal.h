@@ -6,6 +6,7 @@
 #include <condition_variable>
 #include <string>
 #include <iostream>
+#include <sstream>
 
 #ifdef win32
 #include <windows.h>
@@ -24,7 +25,13 @@ namespace LOG
 		void enqueue(std::string msg)
 		{
 			q.push(msg);
+
+			if (msgs.size() >= MAX_QUEUE) {
+				msgs.erase(msgs.begin());
+			}
+			msgs.push_back(msg);
 			cv.notify_one();
+			RedrawWindow((HWND)window_handle, 0, 0, RDW_INVALIDATE);
 		}
 
 	protected:
@@ -35,7 +42,7 @@ namespace LOG
 		static LRESULT HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm);
 	#endif
 
-		const int buffer_size = 10000;
+		const int MAX_QUEUE = 200;
 		bool is_running;
 		std::thread window_thread;
 		std::thread message_thread;
@@ -43,9 +50,22 @@ namespace LOG
 		void* window_handle;
 		void* output_handle;
 
+		std::vector<std::string> msgs;
 		std::queue<std::string> q;
 		std::mutex m;
 		std::condition_variable cv;
+
+		std::string get_msgs()
+		{
+			std::ostringstream oss;
+			for (int i = 0; i < msgs.size(); i++) {
+				oss << msgs[i];
+				if (i < msgs.size() - 1) {
+					oss << "\r\n";
+				}
+			}
+			return oss.str();
+		}
 
 		std::string dequeue()
 		{
