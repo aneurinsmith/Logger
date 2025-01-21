@@ -100,10 +100,6 @@ namespace LOG
 
 				break;
 			}
-			case WM_CREATE: {
-
-				break;
-			}
 			case WM_SIZE: {
 				InvalidateRect(wnd, NULL, true);
 
