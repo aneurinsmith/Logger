@@ -108,11 +108,10 @@ namespace LOG
 
 				SCROLLINFO si;
 				si.cbSize = sizeof(SCROLLINFO);
-				si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
+				si.fMask = SIF_RANGE | SIF_PAGE;
 				si.nMin = 0;
 				si.nMax = data->MAX_QUEUE - (rc.bottom / 18);
 				si.nPage = 1;
-				si.nPos = GetScrollPos(wnd, SB_VERT);
 				SetScrollInfo(wnd, SB_VERT, &si, TRUE);
 
 				break;
@@ -151,7 +150,7 @@ namespace LOG
 				SetScrollPos(wnd, SB_VERT, sp, TRUE);
 				InvalidateRect(wnd, NULL, TRUE);
 
-				return 0;
+				return FALSE;
 			}
 			case WM_PAINT: {
 
@@ -169,6 +168,12 @@ namespace LOG
 				HFONT hf = CreateFontA(18, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, CLIP_DEFAULT_PRECIS, 0, CLEARTYPE_QUALITY, FF_DONTCARE, (LPCSTR)"Consolas");
 				SelectObject(memDC, hf);
 
+				//RECT rc = ps.rcPaint;
+				//int totalHeight = DrawTextA(memDC, (LPCSTR)data->get_msgs().c_str(), -1, &rc, DT_CALCRECT | DT_WORDBREAK | DT_EDITCONTROL);
+
+				//std::cout << totalHeight/18 << std::endl;
+
+				
 				RECT rc;
 				rc.left = ps.rcPaint.left;
 				rc.right = ps.rcPaint.right;
@@ -176,7 +181,8 @@ namespace LOG
 				rc.top = ps.rcPaint.top - (GetScrollPos(wnd, SB_VERT) * 18);
 
 				// Draw text
-				DrawTextA(memDC, (LPCSTR)data->get_msgs().c_str(), -1, &rc, DT_WORDBREAK | DT_EDITCONTROL | DT_LEFT | DT_BOTTOM);
+				//DrawTextA(memDC, (LPCSTR)data->msgs.front().c_str(), -1, &rc, DT_WORDBREAK | DT_EDITCONTROL | DT_LEFT | DT_BOTTOM);
+				
 
 				// Swap buffers
 				BitBlt(hdc, 0, 0, ps.rcPaint.right, ps.rcPaint.bottom, memDC, 0, 0, SRCCOPY);
