@@ -24,19 +24,25 @@ namespace LOG
 		void enqueue(std::string msg)
 		{
 			q.push(msg);
+			cv.notify_one();
 		}
 
 	protected:
-		static void ThreadEntry(void* data);
+		static void WindowThread(void* data);
+		static void MessageThread(void* data);
 
 	#ifdef win32
-		static LRESULT CALLBACK HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm);
+		static LRESULT HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm);
 	#endif
 
+		const int buffer_size = 10000;
 		bool is_running;
-		std::thread thread_handle;
+		std::thread window_thread;
+		std::thread message_thread;
+
 		void* window_handle;
 		void* output_handle;
+
 		std::queue<std::string> q;
 		std::mutex m;
 		std::condition_variable cv;

@@ -3,11 +3,14 @@
 #include <chrono>
 #include <thread>
 
-LOG::Logger logger(LOG::oStreamSink());
+LOG::Logger logger;
 
 int main()
 {
     logger.add_sink(LOG::terminalSink(LOG::NONE));
+    //logger.add_sink(LOG::oStreamSink(LOG::NONE));
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
     for (int i = 0; i < 10000; i++) {
         std::string msg = "Terminal window message ";
@@ -15,7 +18,7 @@ int main()
         logger.print(LOG::TRACE, msg);
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(10));
+    std::this_thread::sleep_for(std::chrono::minutes(10));
 
     return 0;
 }
