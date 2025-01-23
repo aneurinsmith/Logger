@@ -13,6 +13,9 @@
 using std::max;
 using std::min;
 
+static int msgsPos = 0;
+static int linePos = 0;
+
 #define WINDOW_CLASS (LPCWSTR)"terminal_logger"
 
 namespace LOG
@@ -20,20 +23,25 @@ namespace LOG
 	Terminal::Terminal() :
 		is_running(true)
 	{
-		buffer = new char[8192];
-		buffer[0] = '\0';
-
 		std::unique_lock<std::mutex> lk(m);
 		window_thread = std::thread(&Terminal::WindowThread, this);
 		cv.wait(lk);
-		message_thread = std::thread(&Terminal::MessageThread, this);
 	}
 
 	Terminal::~Terminal()
 	{
 		is_running = false;
 		window_thread.join();
-		message_thread.join();
+	}
+
+	void Terminal::enqueue(std::string msg)
+	{
+		m.lock();
+		if (msgs.size() >= MAX_QUEUE) {
+			msgs.erase(msgs.begin());
+		}
+		msgs.push_back(msg);
+		m.unlock();
 	}
 
 
@@ -70,6 +78,7 @@ namespace LOG
 		}
 
 		data->cv.notify_all();
+		SetTimer((HWND)data->window_handle, 1, 10, NULL);
 
         MSG msg = {};
 		while (data->is_running) {
@@ -82,16 +91,8 @@ namespace LOG
 		}
 	}
 
-	void Terminal::MessageThread(void* _data)
-	{
-		Terminal* data = (Terminal*)_data;
-	}
-
 
 	
-	static bool isWithin = true;
-	static int msgsPos = 0;
-	static int linePos = 0;
 	LRESULT Terminal::HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm)
 	{
 		Terminal* data = reinterpret_cast<Terminal*>(::GetWindowLongPtr(wnd, GWLP_USERDATA));
@@ -112,17 +113,12 @@ namespace LOG
 				RECT rc;
 				GetClientRect(wnd, &rc);
 
-				std::cout << "=====" << std::endl;
-				std::cout << linePos << std::endl;
-				std::cout << msgsPos << std::endl;
-				std::cout << rc.bottom / 18 << std::endl;
-
 				SCROLLINFO si;
 				si.cbSize = sizeof(SCROLLINFO);
 				si.fMask = SIF_RANGE | SIF_PAGE;
 				si.nMin = 0;
 				si.nMax = data->MAX_QUEUE - 1;
-				si.nPage = (rc.bottom/18) / data->MAX_QUEUE;
+				si.nPage = 1;
 				SetScrollInfo(wnd, SB_VERT, &si, TRUE);
 
 				break;
@@ -169,9 +165,12 @@ namespace LOG
 						}
 						case SB_THUMBTRACK:
 						case SB_THUMBPOSITION: {
-							//if (HIWORD(wpm) < data->msgs.size()) {
-							msgsPos = HIWORD(wpm);
-							//}
+							if (HIWORD(wpm) < data->msgs.size() - 1) {
+								msgsPos = HIWORD(wpm);
+							}
+							else {
+								msgsPos = data->msgs.size() - 1;
+							}
 
 							break;
 						}
@@ -249,14 +248,12 @@ namespace LOG
 
 
 
-				data->m.lock();
-				std::cout << msgsPos << std::endl;
-				std::cout << data->msgs.size() << std::endl;
-				if (!data->msgs.empty() && msgsPos < data->msgs.size()) {
+				if (!data->msgs.empty()) {
 					RECT topMsgRect;
 					GetClientRect(wnd, &topMsgRect);
 					topMsgRect.top -= linePos * 18;
 
+					data->m.lock();
 					for (auto it = data->msgs.begin() + msgsPos; it != data->msgs.end(); ++it) {
 
 						RECT rc_size = topMsgRect;
@@ -269,8 +266,8 @@ namespace LOG
 
 						if (rc_size.bottom > ps.rcPaint.bottom - 18) break;
 					}
+					data->m.unlock();
 				}
-				data->m.unlock();
 
 
 
@@ -280,6 +277,11 @@ namespace LOG
 
 				DeleteDC(memDC);
 				DeleteObject(memBM);
+
+				return FALSE;
+			}
+			case WM_TIMER: {
+				InvalidateRect(wnd, NULL, TRUE);
 
 				return FALSE;
 			}
