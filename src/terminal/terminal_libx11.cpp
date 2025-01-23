@@ -8,6 +8,21 @@ namespace LOG
 	{
 
 	}
+
+	Terminal::~Terminal()
+	{
+
+	}
+
+	void Terminal::enqueue(std::string msg)
+	{
+
+	}
+
+	void Terminal::WindowThread(void* data)
+	{
+
+	}
 }
 
 #endif
