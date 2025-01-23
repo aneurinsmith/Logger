@@ -47,7 +47,7 @@ target_include_directories(logger INTERFACE
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/logger>"
 )
 
-if(PLATFORM EQUAL "win32")
+if(PLATFORM STREQUAL "win32")
 	target_link_libraries(logger -lcomctl32)
 	target_link_libraries(logger -luxtheme)
 	target_link_libraries(logger -ldwmapi)

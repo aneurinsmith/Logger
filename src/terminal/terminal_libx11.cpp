@@ -4,9 +4,10 @@
 
 namespace LOG
 {
-	Terminal::Terminal()
+	Terminal::Terminal() :
+		is_running(true)
 	{
-
+		thread = std::thread(&Terminal::WindowThread, this);
 	}
 
 	Terminal::~Terminal()
