@@ -51,6 +51,8 @@ if(PLATFORM STREQUAL "win32")
 	target_link_libraries(logger -lcomctl32)
 	target_link_libraries(logger -luxtheme)
 	target_link_libraries(logger -ldwmapi)
+elseif(PLATFORM STREQUAL "libx11")
+	target_link_libraries(logger -lX11)
 endif()
 
 
