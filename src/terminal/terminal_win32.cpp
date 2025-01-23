@@ -126,8 +126,45 @@ namespace LOG
 			}
 			case WM_VSCROLL: {
 
+				HDC hdc = GetDC(wnd);
+				HFONT hf = CreateFontA(18, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, CLIP_DEFAULT_PRECIS, 0, CLEARTYPE_QUALITY, FF_DONTCARE, (LPCSTR)"Consolas");
+				SelectObject(hdc, hf);
+				RECT topMsgRect;
+				GetClientRect(wnd, &topMsgRect);
+
+				auto it = data->msgs.begin() + msgsPos;
+				std::string msg = *it;
+				int topMsgHeight = DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK);
+
+				switch (LOWORD(wpm)) {
+					case SB_LINEUP: {
+						if (linePos > 0) {
+							linePos--;
+						}
+						else {
+							if (msgsPos > 0) {
+								msgsPos--;
+								linePos = (DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK) - 18) / 18;
+							}
+						}
+						break;
+					}
+					case SB_LINEDOWN: {
+						if (linePos < (topMsgHeight - 18) / 18) {
+							linePos++;
+						}
+						else {
+							if (msgsPos < data->msgs.size() - 1) {
+								msgsPos++;
+								linePos = 0;
+							}
+						}
+						break;
+					}
+				}
+
 				//SetScrollPos(wnd, SB_VERT, sp, TRUE);
-				//InvalidateRect(wnd, NULL, TRUE);
+				InvalidateRect(wnd, NULL, TRUE);
 
 				break;
 			}
@@ -144,10 +181,7 @@ namespace LOG
 				std::string msg = *it;
 				int topMsgHeight = DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK);
 
-				
-				std::cout << "=====" << std::endl;
 				if (delta > 0) {
-					std::cout << "Scroll Down" << std::endl;
 					if (linePos > 0) {
 						linePos--;
 					}
@@ -159,7 +193,6 @@ namespace LOG
 					}
 				}
 				else if (delta < 0) {
-					std::cout << "Scroll Up" << std::endl;
 					if (linePos < (topMsgHeight - 18) / 18) {
 						linePos++;
 					}
@@ -170,9 +203,6 @@ namespace LOG
 						}
 					}
 				}
-				std::cout << linePos << std::endl;
-				std::cout << msgsPos << std::endl;
-
 
 				//SetScrollPos(wnd, SB_VERT, sp, TRUE);
 				InvalidateRect(wnd, NULL, TRUE);
@@ -199,21 +229,6 @@ namespace LOG
 				SetTextColor(memDC, 0xCCCCCC);
 
 
-
-				/*
-				
-				1.	Set a int for the position in the messages queue
-				2.	Set a scroll position int for the line that we are on
-
-				3.	Extrapolate the message queue position from the current
-					messagequeue position + scroll position
-
-				4.	Move the ps.rcPaint by the scroll position until the
-					messagequeue message is no longer visible, then reset
-					distance moved by ps.rcPaint and start painting the next
-					messagequeue
-
-				*/
 
 				data->m.lock();
 				if (!data->msgs.empty()) {
