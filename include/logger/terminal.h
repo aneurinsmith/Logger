@@ -33,10 +33,9 @@ namespace LOG
 
 		const int MAX_QUEUE = 10;
 		bool is_running;
-		std::thread window_thread;
+		std::thread thread;
 
-		void* window_handle;
-		void* output_handle;
+		void* handle;
 
 		std::vector<std::string> msgs;
 		std::mutex m;
