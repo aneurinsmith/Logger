@@ -44,7 +44,7 @@ namespace LOG
 		static LRESULT HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm);
 	#endif
 
-		const int MAX_QUEUE = 30;
+		const int MAX_QUEUE = 300;
 		char* buffer;
 		bool is_running;
 		std::thread window_thread;

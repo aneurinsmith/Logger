@@ -112,12 +112,17 @@ namespace LOG
 				RECT rc;
 				GetClientRect(wnd, &rc);
 
+				std::cout << "=====" << std::endl;
+				std::cout << linePos << std::endl;
+				std::cout << msgsPos << std::endl;
+				std::cout << rc.bottom / 18 << std::endl;
+
 				SCROLLINFO si;
 				si.cbSize = sizeof(SCROLLINFO);
 				si.fMask = SIF_RANGE | SIF_PAGE;
 				si.nMin = 0;
-				si.nMax = data->MAX_QUEUE - (rc.bottom / 18);
-				si.nPage = 1;
+				si.nMax = data->MAX_QUEUE - 1;
+				si.nPage = (rc.bottom/18) / data->MAX_QUEUE;
 				SetScrollInfo(wnd, SB_VERT, &si, TRUE);
 
 				break;
@@ -130,40 +135,46 @@ namespace LOG
 				RECT topMsgRect;
 				GetClientRect(wnd, &topMsgRect);
 
-				auto it = data->msgs.begin() + msgsPos;
-				std::string msg = *it;
-				int topMsgHeight = DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK);
+				if (!data->msgs.empty()) {
+					data->m.lock();
+					auto it = data->msgs.begin() + msgsPos;
+					std::string msg = *it;
+					int topMsgHeight = DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK);
+					data->m.unlock();
 
-				switch (LOWORD(wpm)) {
-					case SB_LINEUP: {
-						if (linePos > 0) {
-							linePos--;
-						}
-						else {
-							if (msgsPos > 0) {
-								msgsPos--;
-								linePos = (DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK) - 18) / 18;
+					switch (LOWORD(wpm)) {
+						case SB_LINEUP: {
+							if (linePos > 0) {
+								linePos--;
 							}
-						}
-						break;
-					}
-					case SB_LINEDOWN: {
-						if (linePos < (topMsgHeight - 18) / 18) {
-							linePos++;
-						}
-						else {
-							if (msgsPos < data->msgs.size() - 1) {
-								msgsPos++;
-								linePos = 0;
+							else {
+								if (msgsPos > 0) {
+									msgsPos--;
+									linePos = (DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK) - 18) / 18;
+								}
 							}
+							break;
 						}
-						break;
-					}
-					case SB_THUMBTRACK:
-					case SB_THUMBPOSITION: {
-						msgsPos = HIWORD(wpm);
+						case SB_LINEDOWN: {
+							if (linePos < (topMsgHeight - 18) / 18) {
+								linePos++;
+							}
+							else {
+								if (msgsPos < data->msgs.size() - 1) {
+									msgsPos++;
+									linePos = 0;
+								}
+							}
+							break;
+						}
+						case SB_THUMBTRACK:
+						case SB_THUMBPOSITION: {
+							//if (HIWORD(wpm) < data->msgs.size()) {
+							msgsPos = HIWORD(wpm);
+							//}
 
-						break;
+							break;
+						}
 					}
 				}
 
@@ -181,29 +192,33 @@ namespace LOG
 				RECT topMsgRect;
 				GetClientRect(wnd, &topMsgRect);
 
-				auto it = data->msgs.begin() + msgsPos;
-				std::string msg = *it;
-				int topMsgHeight = DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK);
+				if (!data->msgs.empty()) {
+					data->m.lock();
+					auto it = data->msgs.begin() + msgsPos;
+					std::string msg = *it;
+					int topMsgHeight = DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK);
+					data->m.unlock();
 
-				if (delta > 0) {
-					if (linePos > 0) {
-						linePos--;
-					}
-					else {
-						if (msgsPos > 0) {
-							msgsPos--;
-							linePos = (DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK) - 18) / 18;
+					if (delta > 0) {
+						if (linePos > 0) {
+							linePos--;
+						}
+						else {
+							if (msgsPos > 0) {
+								msgsPos--;
+								linePos = (DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK) - 18) / 18;
+							}
 						}
 					}
-				}
-				else if (delta < 0) {
-					if (linePos < (topMsgHeight - 18) / 18) {
-						linePos++;
-					}
-					else {
-						if (msgsPos < data->msgs.size() - 1) {
-							msgsPos++;
-							linePos = 0;
+					else if (delta < 0) {
+						if (linePos < (topMsgHeight - 18) / 18) {
+							linePos++;
+						}
+						else {
+							if (msgsPos < data->msgs.size() - 1) {
+								msgsPos++;
+								linePos = 0;
+							}
 						}
 					}
 				}
@@ -235,7 +250,9 @@ namespace LOG
 
 
 				data->m.lock();
-				if (!data->msgs.empty()) {
+				std::cout << msgsPos << std::endl;
+				std::cout << data->msgs.size() << std::endl;
+				if (!data->msgs.empty() && msgsPos < data->msgs.size()) {
 					RECT topMsgRect;
 					GetClientRect(wnd, &topMsgRect);
 					topMsgRect.top -= linePos * 18;
