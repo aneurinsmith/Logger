@@ -24,14 +24,14 @@ namespace LOG
 		is_running(true)
 	{
 		std::unique_lock<std::mutex> lk(m);
-		window_thread = std::thread(&Terminal::WindowThread, this);
+		thread = std::thread(&Terminal::WindowThread, this);
 		cv.wait(lk);
 	}
 
 	Terminal::~Terminal()
 	{
 		is_running = false;
-		window_thread.join();
+		thread.join();
 	}
 
 	void Terminal::enqueue(std::string msg)
@@ -67,18 +67,18 @@ namespace LOG
 			}
 		}
 
-		data->window_handle = CreateWindowExW(0,
+		data->handle = CreateWindowExW(0,
 			WINDOW_CLASS, WINDOW_CLASS, 
 			WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_VSCROLL,
 			CW_USEDEFAULT, CW_USEDEFAULT,
 			600, 400,
 			0, (HMENU)0, GetModuleHandleW(NULL), (void*)data);
-		if (!data->window_handle) {
+		if (!data->handle) {
 			throw std::runtime_error("Window creation failed");
 		}
 
 		data->cv.notify_all();
-		SetTimer((HWND)data->window_handle, 1, 10, NULL);
+		SetTimer((HWND)data->handle, 1, 10, NULL);
 
         MSG msg = {};
 		while (data->is_running) {
