@@ -24,12 +24,14 @@ namespace LOG
 
 		void enqueue(std::string msg)
 		{
+			std::lock_guard<std::mutex> lk(m);
 			q.push(msg);
 
 			if (msgs.size() >= MAX_QUEUE) {
 				msgs.erase(msgs.begin());
 			}
 			msgs.push_back(msg);
+
 			cv.notify_one();
 			RedrawWindow((HWND)window_handle, 0, 0, RDW_INVALIDATE);
 		}
@@ -42,7 +44,8 @@ namespace LOG
 		static LRESULT HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm);
 	#endif
 
-		const int MAX_QUEUE = 200;
+		const int MAX_QUEUE = 30;
+		char* buffer;
 		bool is_running;
 		std::thread window_thread;
 		std::thread message_thread;
@@ -54,18 +57,6 @@ namespace LOG
 		std::queue<std::string> q;
 		std::mutex m;
 		std::condition_variable cv;
-
-		std::string get_msgs()
-		{
-			std::ostringstream oss;
-			for (int i = 0; i < msgs.size(); i++) {
-				oss << msgs[i];
-				if (i < msgs.size() - 1) {
-					oss << "\r\n";
-				}
-			}
-			return oss.str();
-		}
 
 		std::string dequeue()
 		{

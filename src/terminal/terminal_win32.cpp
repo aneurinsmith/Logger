@@ -20,6 +20,9 @@ namespace LOG
 	Terminal::Terminal() :
 		is_running(true)
 	{
+		buffer = new char[8192];
+		buffer[0] = '\0';
+
 		std::unique_lock<std::mutex> lk(m);
 		window_thread = std::thread(&Terminal::WindowThread, this);
 		cv.wait(lk);
@@ -86,6 +89,8 @@ namespace LOG
 
 
 
+	static int scrollPos = 0;
+	static int linePos = 0;
 	LRESULT Terminal::HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm)
 	{
 		Terminal* data = reinterpret_cast<Terminal*>(::GetWindowLongPtr(wnd, GWLP_USERDATA));
@@ -168,21 +173,48 @@ namespace LOG
 				HFONT hf = CreateFontA(18, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, CLIP_DEFAULT_PRECIS, 0, CLEARTYPE_QUALITY, FF_DONTCARE, (LPCSTR)"Consolas");
 				SelectObject(memDC, hf);
 
-				//RECT rc = ps.rcPaint;
-				//int totalHeight = DrawTextA(memDC, (LPCSTR)data->get_msgs().c_str(), -1, &rc, DT_CALCRECT | DT_WORDBREAK | DT_EDITCONTROL);
+				SetBkMode(memDC, TRANSPARENT);
+				SetTextColor(memDC, 0xCCCCCC);
 
-				//std::cout << totalHeight/18 << std::endl;
 
+				/*
 				
-				RECT rc;
-				rc.left = ps.rcPaint.left;
-				rc.right = ps.rcPaint.right;
-				rc.bottom = ps.rcPaint.bottom;
-				rc.top = ps.rcPaint.top - (GetScrollPos(wnd, SB_VERT) * 18);
+				1.	Set a int for the position in the messages queue
+				2.	Set a scroll position int for the line that we are on
 
-				// Draw text
-				//DrawTextA(memDC, (LPCSTR)data->msgs.front().c_str(), -1, &rc, DT_WORDBREAK | DT_EDITCONTROL | DT_LEFT | DT_BOTTOM);
-				
+				3.	Extrapolate the message queue position from the current
+					messagequeue position + scroll position
+
+				4.	Move the ps.rcPaint by the scroll position until the
+					messagequeue message is no longer visible, then reset
+					distance moved by ps.rcPaint and start painting the next
+					messagequeue
+
+				*/
+
+				RECT rc = ps.rcPaint;
+				data->m.lock();
+
+				if (!data->msgs.empty()) {
+
+					for (auto it = data->msgs.begin() + GetScrollPos(wnd, SB_VERT); it != data->msgs.end() && GetScrollPos(wnd, SB_VERT) < data->msgs.size(); it++) {
+
+						RECT rc_size = rc;
+						std::string msg = *it;
+						int height = DrawTextA(memDC, (LPCSTR)msg.c_str(), -1, &rc_size, DT_CALCRECT | DT_WORDBREAK);
+						DrawTextA(memDC, (LPCSTR)msg.c_str(), -1, &rc_size, DT_WORDBREAK);
+
+						rc.top += height;
+						rc.bottom += height;
+
+						if (rc_size.bottom > ps.rcPaint.bottom - 18) break;
+					}
+
+				}
+
+				data->m.unlock();
+
+
 
 				// Swap buffers
 				BitBlt(hdc, 0, 0, ps.rcPaint.right, ps.rcPaint.bottom, memDC, 0, 0, SRCCOPY);
