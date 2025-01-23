@@ -88,8 +88,9 @@ namespace LOG
 	}
 
 
-
-	static int scrollPos = 0;
+	
+	static bool isWithin = true;
+	static int msgsPos = 0;
 	static int linePos = 0;
 	LRESULT Terminal::HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm)
 	{
@@ -111,6 +112,7 @@ namespace LOG
 				RECT rc;
 				GetClientRect(wnd, &rc);
 
+				/*
 				SCROLLINFO si;
 				si.cbSize = sizeof(SCROLLINFO);
 				si.fMask = SIF_RANGE | SIF_PAGE;
@@ -118,41 +120,61 @@ namespace LOG
 				si.nMax = data->MAX_QUEUE - (rc.bottom / 18);
 				si.nPage = 1;
 				SetScrollInfo(wnd, SB_VERT, &si, TRUE);
+				*/
 
 				break;
 			}
 			case WM_VSCROLL: {
-				int sp = GetScrollPos(wnd, SB_VERT);
 
-				switch (LOWORD(wpm)) {
-				case SB_LINEUP:
-					sp = max(0, sp - 1);
-					break;
-				case SB_LINEDOWN:
-					sp = min(data->MAX_QUEUE, sp + 1);
-					break;
-				case SB_THUMBTRACK:
-				case SB_THUMBPOSITION:
-					sp = HIWORD(wpm);
-					break;
-				}
-				SetScrollPos(wnd, SB_VERT, sp, TRUE);
-				InvalidateRect(wnd, NULL, TRUE);
+				//SetScrollPos(wnd, SB_VERT, sp, TRUE);
+				//InvalidateRect(wnd, NULL, TRUE);
 
 				break;
 			}
 			case WM_MOUSEWHEEL: {
 
 				int delta = GET_WHEEL_DELTA_WPARAM(wpm);
-				int sp = GetScrollPos(wnd, SB_VERT);
+				HDC hdc = GetDC(wnd);
+				HFONT hf = CreateFontA(18, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, CLIP_DEFAULT_PRECIS, 0, CLEARTYPE_QUALITY, FF_DONTCARE, (LPCSTR)"Consolas");
+				SelectObject(hdc, hf);
+				RECT topMsgRect;
+				GetClientRect(wnd, &topMsgRect);
 
+				auto it = data->msgs.begin() + msgsPos;
+				std::string msg = *it;
+				int topMsgHeight = DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK);
+
+				
+				std::cout << "=====" << std::endl;
 				if (delta > 0) {
-					sp = max(0, sp - 1);
+					std::cout << "Scroll Down" << std::endl;
+					if (linePos > 0) {
+						linePos--;
+					}
+					else {
+						if (msgsPos > 0) {
+							msgsPos--;
+							linePos = (DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK) - 18) / 18;
+						}
+					}
 				}
 				else if (delta < 0) {
-					sp = min(data->MAX_QUEUE, sp + 1);
+					std::cout << "Scroll Up" << std::endl;
+					if (linePos < (topMsgHeight - 18) / 18) {
+						linePos++;
+					}
+					else {
+						if (msgsPos < data->msgs.size() - 1) {
+							msgsPos++;
+							linePos = 0;
+						}
+					}
 				}
-				SetScrollPos(wnd, SB_VERT, sp, TRUE);
+				std::cout << linePos << std::endl;
+				std::cout << msgsPos << std::endl;
+
+
+				//SetScrollPos(wnd, SB_VERT, sp, TRUE);
 				InvalidateRect(wnd, NULL, TRUE);
 
 				return FALSE;
@@ -177,6 +199,7 @@ namespace LOG
 				SetTextColor(memDC, 0xCCCCCC);
 
 
+
 				/*
 				
 				1.	Set a int for the position in the messages queue
@@ -192,26 +215,25 @@ namespace LOG
 
 				*/
 
-				RECT rc = ps.rcPaint;
 				data->m.lock();
-
 				if (!data->msgs.empty()) {
+					RECT topMsgRect;
+					GetClientRect(wnd, &topMsgRect);
+					topMsgRect.top -= linePos * 18;
 
-					for (auto it = data->msgs.begin() + GetScrollPos(wnd, SB_VERT); it != data->msgs.end() && GetScrollPos(wnd, SB_VERT) < data->msgs.size(); it++) {
+					for (auto it = data->msgs.begin() + msgsPos; it != data->msgs.end(); ++it) {
 
-						RECT rc_size = rc;
+						RECT rc_size = topMsgRect;
 						std::string msg = *it;
 						int height = DrawTextA(memDC, (LPCSTR)msg.c_str(), -1, &rc_size, DT_CALCRECT | DT_WORDBREAK);
 						DrawTextA(memDC, (LPCSTR)msg.c_str(), -1, &rc_size, DT_WORDBREAK);
 
-						rc.top += height;
-						rc.bottom += height;
+						topMsgRect.top += height;
+						topMsgRect.bottom += height;
 
 						if (rc_size.bottom > ps.rcPaint.bottom - 18) break;
 					}
-
 				}
-
 				data->m.unlock();
 
 
