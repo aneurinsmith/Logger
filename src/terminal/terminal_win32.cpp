@@ -37,6 +37,7 @@ namespace LOG
 			msgs.erase(msgs.begin());
 		}
 		msgs.push_back(msg);
+		if(msgsPos < MAX_QUEUE -1) msgsPos++;
 		m.unlock();
 	}
 
@@ -281,6 +282,7 @@ namespace LOG
 			}
 			case WM_TIMER: {
 				InvalidateRect(wnd, NULL, TRUE);
+				SetScrollPos(wnd, SB_VERT, msgsPos, TRUE);
 
 				return FALSE;
 			}
