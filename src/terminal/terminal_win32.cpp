@@ -2,9 +2,10 @@
 #ifdef win32
 #include "terminal.h"
 
+#include <dwmapi.h>
+#include <Uxtheme.h>
 #include <commctrl.h>
 #include <stdexcept>
-
 #include <cstdint>
 #include <iostream>
 
@@ -100,6 +101,9 @@ namespace LOG
 				data = static_cast<Terminal*>(reinterpret_cast<LPCREATESTRUCT>(lpm)->lpCreateParams);
 				SetWindowLongPtrA(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(data));
 
+				BOOL value = TRUE;
+				DwmSetWindowAttribute(wnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
+				SetWindowTheme(wnd, L"DarkMode_Explorer", nullptr);
 				break;
 			}
 			case WM_SIZE: {

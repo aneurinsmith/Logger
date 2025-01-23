@@ -48,6 +48,8 @@ target_include_directories(logger INTERFACE
 )
 
 target_link_libraries(logger -lcomctl32)
+target_link_libraries(logger -luxtheme)
+target_link_libraries(logger -ldwmapi)
 
 
 
