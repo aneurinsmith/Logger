@@ -112,7 +112,6 @@ namespace LOG
 				RECT rc;
 				GetClientRect(wnd, &rc);
 
-				/*
 				SCROLLINFO si;
 				si.cbSize = sizeof(SCROLLINFO);
 				si.fMask = SIF_RANGE | SIF_PAGE;
@@ -120,7 +119,6 @@ namespace LOG
 				si.nMax = data->MAX_QUEUE - (rc.bottom / 18);
 				si.nPage = 1;
 				SetScrollInfo(wnd, SB_VERT, &si, TRUE);
-				*/
 
 				break;
 			}
@@ -161,9 +159,15 @@ namespace LOG
 						}
 						break;
 					}
+					case SB_THUMBTRACK:
+					case SB_THUMBPOSITION: {
+						msgsPos = HIWORD(wpm);
+
+						break;
+					}
 				}
 
-				//SetScrollPos(wnd, SB_VERT, sp, TRUE);
+				SetScrollPos(wnd, SB_VERT, msgsPos, TRUE);
 				InvalidateRect(wnd, NULL, TRUE);
 
 				break;
@@ -204,7 +208,7 @@ namespace LOG
 					}
 				}
 
-				//SetScrollPos(wnd, SB_VERT, sp, TRUE);
+				SetScrollPos(wnd, SB_VERT, msgsPos, TRUE);
 				InvalidateRect(wnd, NULL, TRUE);
 
 				return FALSE;
