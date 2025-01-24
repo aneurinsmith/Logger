@@ -2,7 +2,6 @@
 #ifdef libx11
 #include "terminal.h"
 
-#include <X11/Xlib.h>
 
 namespace LOG
 {
@@ -29,18 +28,18 @@ namespace LOG
 	{
 		Terminal* data = (Terminal*)_data;
 
-		Display* display = XOpenDisplay(0);
-		if (!display) {
+		Display* dpy = XOpenDisplay(0);
+		if (!dpy) {
 			throw std::runtime_error("Could not find default display");
 		}
 
-		Window root = DefaultRootWindow(display);
+		Window root = DefaultRootWindow(dpy);
 		if (!root) {
 			throw std::runtime_error("Could not find root window");
 		}
 
 		data->handle = (void*)XCreateSimpleWindow(
-			display, root, 
+			dpy, root,
 			0, 0, 
 			600, 400, 
 			0, 0, 0xffffff);
@@ -50,25 +49,45 @@ namespace LOG
 
 		data->cv.notify_all();
 
-		XMapWindow(display, (Window)data->handle);
-		Atom wm_delete_window = XInternAtom(display, "WM_DELETE_WINDOW", False);
-		XSetWMProtocols(display, (Window)data->handle, &wm_delete_window, 1);
+		XSelectInput(dpy, (Window)data->handle, ExposureMask);
+		XMapWindow(dpy, (Window)data->handle);
+		Atom wm_delete_window = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
+		XSetWMProtocols(dpy, (Window)data->handle, &wm_delete_window, 1);
 
-		XEvent msg;
+		XEvent xe;
 		while (data->is_running) {
-			XNextEvent(display, &msg);
 
-			switch (msg.type) {
-				case ClientMessage: {
-					if (msg.xclient.data.l[0] == wm_delete_window) {
-						XDestroyWindow(display, (Window)data->handle);
-						data->is_running = false;
-					}
-				}
+			if (XPending(dpy)) {
+				XNextEvent(dpy, &xe);
+				data->HandleMessage(dpy, (Window)data->handle, xe);
+			}
+
+			switch (xe.type) {
+				
 			}
 		}
 
-		XCloseDisplay(display);
+		XCloseDisplay(dpy);
+	}
+
+
+
+	void Terminal::HandleMessage(Display* dpy, Window wnd, XEvent xe)
+	{
+
+		switch (xe.type) {
+			case ClientMessage: {
+				if (xe.xclient.data.l[0] == XInternAtom(dpy, "WM_DELETE_WINDOW", False)) {
+					XDestroyWindow(dpy, wnd);
+					is_running = false;
+				}
+				break;
+			}
+			case Expose: {
+				XFillRectangle(dpy, wnd, DefaultGC(dpy, 0), 20, 20, 100, 100);
+				break;
+			}
+		}
 	}
 }
 

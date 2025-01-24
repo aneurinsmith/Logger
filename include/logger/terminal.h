@@ -11,6 +11,8 @@
 #ifdef win32
 #include <windows.h>
 #undef ERROR
+#elif libx11
+#include <X11/Xlib.h>
 #endif
 
 namespace LOG
@@ -29,6 +31,8 @@ namespace LOG
 
 	#ifdef win32
 		static LRESULT CALLBACK HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm);
+	#elif libx11
+		void HandleMessage(Display* dpy, Window wnd, XEvent xe);
 	#endif
 
 		const int MAX_QUEUE = 100;
