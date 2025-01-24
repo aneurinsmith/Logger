@@ -2,6 +2,9 @@
 #ifdef libx11
 #include "terminal.h"
 
+#include <X11/Xutil.h>
+#include <X11/Xft/Xft.h>
+#include <stdio.h>
 
 namespace LOG
 {
@@ -42,7 +45,7 @@ namespace LOG
 			dpy, root,
 			0, 0, 
 			600, 400, 
-			0, 0, 0xffffff);
+			0, 0, 0x0C0C0C);
 		if (!data->handle) {
 			throw std::runtime_error("Could not create the window");
 		}
@@ -74,7 +77,6 @@ namespace LOG
 
 	void Terminal::HandleMessage(Display* dpy, Window wnd, XEvent xe)
 	{
-
 		switch (xe.type) {
 			case ClientMessage: {
 				if (xe.xclient.data.l[0] == XInternAtom(dpy, "WM_DELETE_WINDOW", False)) {
@@ -84,7 +86,26 @@ namespace LOG
 				break;
 			}
 			case Expose: {
-				XFillRectangle(dpy, wnd, DefaultGC(dpy, 0), 20, 20, 100, 100);
+
+				int screen = DefaultScreen(dpy);
+				Visual* visual = DefaultVisual(dpy, screen);
+				Colormap cmap = DefaultColormap(dpy, screen);
+				XftDraw* draw = XftDrawCreate(dpy, wnd, visual, cmap);
+
+				// Set background
+				XftColor color;
+				XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &color);
+				XftDrawRect(draw, &color, 0, 0, 100, 100);
+
+				// Create font
+				XftFont* font = XftFontOpenName(dpy, 0, "Consolas:size=11");
+				XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &color);
+
+				XftDrawStringUtf8(draw, &color, font, 0, 50, (const FcChar8*)"Term", 4);
+
+				XftColorFree(dpy, visual, cmap, &color);
+				XftDrawDestroy(draw);
+
 				break;
 			}
 		}

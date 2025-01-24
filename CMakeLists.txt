@@ -53,6 +53,7 @@ if(PLATFORM STREQUAL "win32")
 	target_link_libraries(logger -ldwmapi)
 elseif(PLATFORM STREQUAL "libx11")
 	target_link_libraries(logger -lX11)
+	target_link_libraries(logger -lXft)
 endif()
 
 
