@@ -176,6 +176,8 @@ namespace LOG
 						}
 					}
 				}
+				DeleteObject(hf);
+				ReleaseDC(wnd, hdc);
 
 				SetScrollPos(wnd, SB_VERT, msgsPos, TRUE);
 				InvalidateRect(wnd, NULL, TRUE);
@@ -221,6 +223,8 @@ namespace LOG
 						}
 					}
 				}
+				DeleteObject(hf);
+				DeleteDC(hdc);
 
 				SetScrollPos(wnd, SB_VERT, msgsPos, TRUE);
 				InvalidateRect(wnd, NULL, TRUE);
@@ -275,6 +279,8 @@ namespace LOG
 				BitBlt(hdc, 0, 0, ps.rcPaint.right, ps.rcPaint.bottom, memDC, 0, 0, SRCCOPY);
 				EndPaint(wnd, &ps);
 
+				DeleteObject(hf);
+				DeleteObject(brush);
 				DeleteDC(memDC);
 				DeleteObject(memBM);
 
