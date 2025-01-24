@@ -90,18 +90,32 @@ namespace LOG
 				int screen = DefaultScreen(dpy);
 				Visual* visual = DefaultVisual(dpy, screen);
 				Colormap cmap = DefaultColormap(dpy, screen);
-				XftDraw* draw = XftDrawCreate(dpy, wnd, visual, cmap);
+				Pixmap drawMem = XCreatePixmap(dpy, wnd,
+					DisplayWidth(dpy, screen), 
+					DisplayHeight(dpy, screen), 
+					DefaultDepth(dpy, screen));
+				XftDraw* draw = XftDrawCreate(dpy, drawMem, visual, cmap);
 
 				// Set background
 				XftColor color;
 				XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &color);
-				XftDrawRect(draw, &color, 0, 0, 100, 100);
+				XftDrawRect(draw, &color, 0, 0, DisplayWidth(dpy, screen), DisplayHeight(dpy, screen));
 
 				// Create font
 				XftFont* font = XftFontOpenName(dpy, 0, "Consolas:size=11");
 				XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &color);
 
+
+
 				XftDrawStringUtf8(draw, &color, font, 0, 50, (const FcChar8*)"Term", 4);
+
+
+
+				// Swap buffers
+				XCopyArea(dpy, drawMem, wnd, DefaultGC(dpy, screen), 0, 0,
+					DisplayWidth(dpy, screen),
+					DisplayHeight(dpy, screen), 
+					0, 0);
 
 				XftColorFree(dpy, visual, cmap, &color);
 				XftDrawDestroy(draw);
