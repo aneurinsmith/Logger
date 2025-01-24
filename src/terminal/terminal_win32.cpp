@@ -90,7 +90,7 @@ namespace LOG
 
 
 	
-	LRESULT Terminal::HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm)
+	LRESULT CALLBACK Terminal::HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm)
 	{
 		Terminal* data = reinterpret_cast<Terminal*>(::GetWindowLongPtr(wnd, GWLP_USERDATA));
 

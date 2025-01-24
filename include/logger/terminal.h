@@ -28,7 +28,7 @@ namespace LOG
 		static void WindowThread(void* data);
 
 	#ifdef win32
-		static LRESULT HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm);
+		static LRESULT CALLBACK HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm);
 	#endif
 
 		const int MAX_QUEUE = 100;
