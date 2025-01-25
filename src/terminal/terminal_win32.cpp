@@ -2,299 +2,66 @@
 #ifdef win32
 #include "terminal.h"
 
+#include <pango/pangocairo.h>
+#include <gdk/gdkwin32.h>
 #include <dwmapi.h>
 #include <Uxtheme.h>
-#include <commctrl.h>
-#include <stdexcept>
-#include <cstdint>
-#include <iostream>
-
-static int msgsPos = 0;
-static int linePos = 0;
-
-#define WINDOW_CLASS (LPCWSTR)"terminal_logger"
 
 namespace LOG
 {
-	Terminal::Terminal() :
-		is_running(true)
-	{
-		std::unique_lock<std::mutex> lk(m);
-		thread = std::thread(&Terminal::WindowThread, this);
-		cv.wait(lk);
-	}
-
-	Terminal::~Terminal()
-	{
-		is_running = false;
-		thread.join();
-	}
-
-	void Terminal::enqueue(std::string msg)
-	{
-		m.lock();
-		if (msgs.size() >= MAX_QUEUE) {
-			msgs.erase(msgs.begin());
-		}
-		msgs.push_back(msg);
-		if(msgsPos < msgs.size() -1) msgsPos++;
-		m.unlock();
-	}
-
-
-
-	void Terminal::WindowThread(void* _data)
+	void Terminal::on_activate(GtkApplication* app, gpointer _data)
 	{
 		Terminal* data = (Terminal*)_data;
 
-		WNDCLASSEXW wcex = {};
+		data->window = gtk_application_window_new(app);
+		gtk_window_set_title(GTK_WINDOW(data->window), "Logger Window");
+		data->drawable = gtk_drawing_area_new();
+		gtk_container_add(GTK_CONTAINER(data->window), data->drawable);
 
-		if (!GetClassInfoExW(GetModuleHandleW(NULL), WINDOW_CLASS, &wcex)) {
-			wcex.cbSize = sizeof(WNDCLASSEXW);
-			wcex.lpfnWndProc = HandleMessage;
-			wcex.cbClsExtra = 0;
-			wcex.cbWndExtra = 0;
-			wcex.hInstance = GetModuleHandleW(NULL);
-			wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-			wcex.lpszClassName = WINDOW_CLASS;
-			wcex.style = CS_BYTEALIGNWINDOW | CS_DBLCLKS;
+		GdkColor bkgColor;
+		gdk_color_parse("#0C0C0C", &bkgColor);
+		gtk_widget_modify_bg(data->window, GTK_STATE_NORMAL, &bkgColor);
 
-			if (!RegisterClassExW(&wcex)) {
-				throw std::runtime_error("Window class failed to register");
-			}
-		}
+		g_signal_connect(data->window, "realize", G_CALLBACK(on_realise), data);
+		g_signal_connect(data->drawable, "draw", G_CALLBACK(on_draw), data);
 
-		data->handle = CreateWindowExW(0,
-			WINDOW_CLASS, WINDOW_CLASS, 
-			WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_VSCROLL,
-			CW_USEDEFAULT, CW_USEDEFAULT,
-			600, 400,
-			0, (HMENU)0, GetModuleHandleW(NULL), (void*)data);
-		if (!data->handle) {
-			throw std::runtime_error("Window creation failed");
-		}
-
+		gtk_widget_show_all(data->window);
 		data->cv.notify_all();
-		SetTimer((HWND)data->handle, 1, 10, NULL);
-
-        MSG msg = {};
-		while (data->is_running) {
-
-			if (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)) {
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
-
-		}
+		gtk_main();
 	}
 
-
-	
-	LRESULT CALLBACK Terminal::HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm)
+	void Terminal::on_realise(GtkWidget* wnd, gpointer _data)
 	{
-		Terminal* data = reinterpret_cast<Terminal*>(::GetWindowLongPtr(wnd, GWLP_USERDATA));
+		GdkWindow* gdk_window = gtk_widget_get_window(wnd);
+		HWND hwnd = (HWND)gdk_win32_window_get_handle(gdk_window);
 
-		switch (msg) {
-			case WM_ERASEBKGND: {
-				return TRUE;
-			}
-			case WM_NCCREATE: {
-				data = static_cast<Terminal*>(reinterpret_cast<LPCREATESTRUCT>(lpm)->lpCreateParams);
-				SetWindowLongPtrA(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(data));
+		BOOL value = TRUE;
+		DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
+	}
 
-				BOOL value = TRUE;
-				DwmSetWindowAttribute(wnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
-				SetWindowTheme(wnd, L"DarkMode_Explorer", nullptr);
-				break;
-			}
-			case WM_SIZE: {
-				InvalidateRect(wnd, NULL, true);
+	gboolean Terminal::on_draw(GtkWidget* wnd, cairo_t* cr, gpointer _data)
+	{
+		Terminal* data = (Terminal*)_data;
 
-				RECT rc;
-				GetClientRect(wnd, &rc);
+		cairo_move_to(cr, 0, 2);
+		cairo_set_source_rgb(cr, 0xCC, 0xCC, 0xCC);
 
-				SCROLLINFO si;
-				si.cbSize = sizeof(SCROLLINFO);
-				si.fMask = SIF_RANGE | SIF_PAGE;
-				si.nMin = 0;
-				si.nMax = data->MAX_QUEUE - 1;
-				si.nPage = 1;
-				SetScrollInfo(wnd, SB_VERT, &si, TRUE);
+		// Create font and text attributes
+		PangoLayout* layout = pango_cairo_create_layout(cr);
+		PangoFontDescription* desc = pango_font_description_from_string("Consolas 11");
+		pango_layout_set_font_description(layout, desc);
+		pango_font_description_free(desc);
+		pango_layout_set_width(layout, 100000);
+		pango_layout_set_wrap(layout, PANGO_WRAP_CHAR);
 
-				break;
-			}
-			case WM_VSCROLL: {
-
-				HDC hdc = GetDC(wnd);
-				HFONT hf = CreateFontA(18, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, CLIP_DEFAULT_PRECIS, 0, CLEARTYPE_QUALITY, FF_DONTCARE, (LPCSTR)"Consolas");
-				SelectObject(hdc, hf);
-				RECT topMsgRect;
-				GetClientRect(wnd, &topMsgRect);
-
-				if (!data->msgs.empty()) {
-					data->m.lock();
-					auto it = data->msgs.begin() + msgsPos;
-					std::string msg = *it;
-					int topMsgHeight = DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK);
-					data->m.unlock();
-
-					switch (LOWORD(wpm)) {
-						case SB_LINEUP: {
-							if (linePos > 0) {
-								linePos--;
-							}
-							else {
-								if (msgsPos > 0) {
-									msgsPos--;
-									linePos = (DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK) - 18) / 18;
-								}
-							}
-							break;
-						}
-						case SB_LINEDOWN: {
-							if (linePos < (topMsgHeight - 18) / 18) {
-								linePos++;
-							}
-							else {
-								if (msgsPos < data->msgs.size() - 1) {
-									msgsPos++;
-									linePos = 0;
-								}
-							}
-							break;
-						}
-						case SB_THUMBTRACK:
-						case SB_THUMBPOSITION: {
-							if (HIWORD(wpm) < data->msgs.size() - 1) {
-								msgsPos = HIWORD(wpm);
-							}
-							else {
-								msgsPos = data->msgs.size() - 1;
-							}
-
-							break;
-						}
-					}
-				}
-				DeleteObject(hf);
-				DeleteDC(hdc);
-
-				SetScrollPos(wnd, SB_VERT, msgsPos, TRUE);
-				InvalidateRect(wnd, NULL, TRUE);
-
-				break;
-			}
-			case WM_MOUSEWHEEL: {
-
-				int delta = GET_WHEEL_DELTA_WPARAM(wpm);
-				HDC hdc = GetDC(wnd);
-				HFONT hf = CreateFontA(18, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, CLIP_DEFAULT_PRECIS, 0, CLEARTYPE_QUALITY, FF_DONTCARE, (LPCSTR)"Consolas");
-				SelectObject(hdc, hf);
-				RECT topMsgRect;
-				GetClientRect(wnd, &topMsgRect);
-
-				if (!data->msgs.empty()) {
-					data->m.lock();
-					auto it = data->msgs.begin() + msgsPos;
-					std::string msg = *it;
-					int topMsgHeight = DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK);
-					data->m.unlock();
-
-					if (delta > 0) {
-						if (linePos > 0) {
-							linePos--;
-						}
-						else {
-							if (msgsPos > 0) {
-								msgsPos--;
-								linePos = (DrawTextA(hdc, (LPCSTR)msg.c_str(), -1, &topMsgRect, DT_CALCRECT | DT_WORDBREAK) - 18) / 18;
-							}
-						}
-					}
-					else if (delta < 0) {
-						if (linePos < (topMsgHeight - 18) / 18) {
-							linePos++;
-						}
-						else {
-							if (msgsPos < data->msgs.size() - 1) {
-								msgsPos++;
-								linePos = 0;
-							}
-						}
-					}
-				}
-				DeleteObject(hf);
-				DeleteDC(hdc);
-
-				SetScrollPos(wnd, SB_VERT, msgsPos, TRUE);
-				InvalidateRect(wnd, NULL, TRUE);
-
-				return FALSE;
-			}
-			case WM_PAINT: {
-
-				PAINTSTRUCT ps;
-				HDC hdc = BeginPaint(wnd, &ps);
-				HDC memDC = CreateCompatibleDC(hdc);
-				HBITMAP memBM = CreateCompatibleBitmap(hdc, ps.rcPaint.right, ps.rcPaint.bottom);
-				SelectObject(memDC, memBM);
-
-				// Set background
-				HBRUSH brush = CreateSolidBrush(0x0C0C0C);
-				FillRect(memDC, &ps.rcPaint, brush);
-
-				// Create font
-				HFONT hf = CreateFontA(18, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, CLIP_DEFAULT_PRECIS, 0, CLEARTYPE_QUALITY, FF_DONTCARE, (LPCSTR)"Consolas");
-				SelectObject(memDC, hf);
-
-				SetBkMode(memDC, TRANSPARENT);
-				SetTextColor(memDC, 0xCCCCCC);
-
-
-
-				if (!data->msgs.empty()) {
-					RECT topMsgRect;
-					GetClientRect(wnd, &topMsgRect);
-					topMsgRect.top -= linePos * 18;
-
-					data->m.lock();
-					for (auto it = data->msgs.begin() + msgsPos; it != data->msgs.end(); ++it) {
-
-						RECT rc_size = topMsgRect;
-						std::string msg = *it;
-						int height = DrawTextA(memDC, (LPCSTR)msg.c_str(), -1, &rc_size, DT_CALCRECT | DT_WORDBREAK);
-						DrawTextA(memDC, (LPCSTR)msg.c_str(), -1, &rc_size, DT_WORDBREAK);
-
-						topMsgRect.top += height;
-						topMsgRect.bottom += height;
-
-						if (rc_size.bottom > ps.rcPaint.bottom - 18) break;
-					}
-					data->m.unlock();
-				}
-
-
-
-				// Swap buffers
-				BitBlt(hdc, 0, 0, ps.rcPaint.right, ps.rcPaint.bottom, memDC, 0, 0, SRCCOPY);
-				EndPaint(wnd, &ps);
-
-				DeleteObject(hf);
-				DeleteObject(brush);
-				DeleteDC(memDC);
-				DeleteObject(memBM);
-
-				return FALSE;
-			}
-			case WM_TIMER: {
-				InvalidateRect(wnd, NULL, TRUE);
-				SetScrollPos(wnd, SB_VERT, msgsPos, TRUE);
-
-				return FALSE;
-			}
+		if (!data->msgs.empty()) {
+			pango_layout_set_text(layout, data->msgs.back().c_str(), -1);
 		}
 
-		return DefWindowProcA(wnd, msg, wpm, lpm);
+		// Swap buffers
+		pango_cairo_show_layout(cr, layout);
+
+		return true;
 	}
 }
 

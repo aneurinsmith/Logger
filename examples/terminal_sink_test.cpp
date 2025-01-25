@@ -2,6 +2,7 @@
 #include <logger.h>
 #include <chrono>
 #include <thread>
+#include <iostream>
 
 LOG::Logger logger;
 
@@ -17,6 +18,7 @@ int main()
         msg += std::to_string(i);
         logger.print(LOG::TRACE, msg);
     }
+    std::cout << "done" << std::endl;
 
     std::this_thread::sleep_for(std::chrono::minutes(10));
 
