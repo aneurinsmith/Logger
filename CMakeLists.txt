@@ -1,5 +1,5 @@
 ﻿
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.12)
 project (Logger)
 
 include(GenerateExportHeader)
@@ -14,17 +14,6 @@ set(LOGGER_VERSION 0.1.0)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-
-
-
-#-------------------#
-#  REQUIRE GTK 3.0  #
-#-------------------#
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
-include_directories(${GTK3_INCLUDE_DIRS})
-link_directories(${GTK3_LIBRARY_DIRS})
-add_definitions(${GTK3_CFLAGS_OTHER})
 
 
 
@@ -57,9 +46,6 @@ target_include_directories(logger INTERFACE
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/logger>"
 )
 
-# link gtk library
-target_link_libraries(logger ${GTK3_LIBRARIES})
-
 # link platform libraries to logger
 if(PLATFORM STREQUAL "win32")
 	target_link_libraries(logger -lcomctl32)
@@ -68,6 +54,7 @@ if(PLATFORM STREQUAL "win32")
 elseif(PLATFORM STREQUAL "libx11")
 	target_link_libraries(logger -lX11)
 	target_link_libraries(logger -lXft)
+	target_link_libraries(logger -ldecor-0)
 endif()
 
 

@@ -1,13 +1,19 @@
 
 #pragma once
-#include <gtk/gtk.h>
-
 #include <thread>
-#include <vector>
+#include <queue>
 #include <mutex>
 #include <condition_variable>
 #include <string>
 #include <iostream>
+
+#ifdef win32
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
+	#undef ERROR
+#elif libx11
+	#include <X11/Xlib.h>
+#endif
 
 namespace LOG
 {
@@ -19,46 +25,57 @@ namespace LOG
 		{
 			std::unique_lock<std::mutex> lk(m);
 			thread = std::thread(&Terminal::ThreadStart, this);
-			//cv.wait(lk);
+			cv.wait(lk);
 		}
+
 		~Terminal()
 		{
-			gtk_main_quit();
+			is_running = false;
 			thread.join();
 		}
 
 		void push(std::string msg)
 		{
-			//m.lock();
+			m.lock();
 			if (msgs.size() >= MAX_QUEUE) {
 				msgs.erase(msgs.begin());
 			}
 			msgs.push_back(msg);
 			if (msgsPos < msgs.size() - 1) msgsPos++;
-			//m.unlock();
+			m.unlock();
 		}
 
 	protected:
+
+	#ifdef win32
+		static LRESULT CALLBACK HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm);
+	#elif libx11
+		static void HandleMessage(XEvent* xe, void* _data);
+	#endif
+
 		static void ThreadStart(void* _data)
 		{
 			Terminal* data = (Terminal*)_data;
-			GtkApplication* app = gtk_application_new("org.gtk.terminal", G_APPLICATION_FLAGS_NONE);
-			g_signal_connect(app, "activate", G_CALLBACK(on_activate), data);
-			g_application_run(G_APPLICATION(app), 0, 0);
+			data->init();
+			data->cv.notify_all();
+			data->run();
 		}
-		static void on_activate(GtkApplication* app, gpointer _data);
-		static void on_realise(GtkWidget* wnd, gpointer _data);
-		static gboolean on_draw(GtkWidget* wnd, cairo_t* cr, gpointer _data);
 
-	private:
-		const int MAX_QUEUE = 100;
+		void init();
+		void run();
+
+		void on_draw();
+		void on_destroy();
+
+		const int MAX_QUEUE = 200;
+		const char* WINDOW_NAME = "Logger";
+
 		int msgsPos = 0;
 		int linePos = 0;
 
-		GtkWidget* window;
-		GtkWidget* drawable;
+		void* handle;
 
-		bool is_running;
+		bool is_running = true;
 		std::thread thread;
 
 		std::vector<std::string> msgs;
