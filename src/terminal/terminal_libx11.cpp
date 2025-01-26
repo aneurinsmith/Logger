@@ -2,13 +2,14 @@
 #ifdef libx11
 #include "terminal.h"
 
-#include <wayland-client.h>
-#include <libdecor-0/libdecor.h>
+#include <X11/Xutil.h>
+#include <X11/Xatom.h>
+#include <X11/Xft/Xft.h>
 
 namespace LOG
 {
-	static Display* dpy;
-	static Window root;
+	Display* dpy;
+	Window root;
 
 	void Terminal::HandleMessage(XEvent* xe, void* _data)
 	{
@@ -28,7 +29,7 @@ namespace LOG
 
 	void Terminal::init()
 	{
-		dpy = XOpenDisplay(0);
+		dpy = XOpenDisplay(NULL);
 		if (!dpy) {
 			throw std::runtime_error("Could not find default display");
 		}
@@ -47,13 +48,8 @@ namespace LOG
 			throw std::runtime_error("Could not create the window");
 		}
 
-		XSetWindowAttributes attrs;
-		attrs.override_redirect = True;
-		XChangeWindowAttributes(dpy, (Window)handle, CWOverrideRedirect, &attrs);
-
 		XSelectInput(dpy, (Window)handle, ExposureMask);
 		XMapWindow(dpy, (Window)handle);
-
 		Atom wm_delete_window = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 		XSetWMProtocols(dpy, (Window)handle, &wm_delete_window, 1);
 	}

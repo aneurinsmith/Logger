@@ -8,11 +8,11 @@
 #include <iostream>
 
 #ifdef win32
-	#define WIN32_LEAN_AND_MEAN
-	#include <windows.h>
-	#undef ERROR
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#undef ERROR
 #elif libx11
-	#include <X11/Xlib.h>
+#include <X11/Xlib.h>
 #endif
 
 namespace LOG
@@ -45,7 +45,7 @@ namespace LOG
 			m.unlock();
 		}
 
-	protected:
+	private:
 
 	#ifdef win32
 		static LRESULT CALLBACK HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm);

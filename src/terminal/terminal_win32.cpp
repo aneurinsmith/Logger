@@ -2,12 +2,25 @@
 #ifdef win32
 #include "terminal.h"
 
-#include <windows.h>
-
 namespace LOG
 {
 	LRESULT CALLBACK Terminal::HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm)
 	{
+		Terminal* data = reinterpret_cast<Terminal*>(::GetWindowLongPtr(wnd, GWLP_USERDATA));
+
+		switch (msg) {
+		case WM_CREATE:
+			data = static_cast<Terminal*>(reinterpret_cast<LPCREATESTRUCT>(lpm)->lpCreateParams);
+			SetWindowLongPtrA(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(data));
+			break;
+		case WM_PAINT:
+			data->on_draw();
+			break;
+		case WM_DESTROY:
+			data->on_destroy();
+			break;
+		}
+
 		return DefWindowProcA(wnd, msg, wpm, lpm);
 	}
 
@@ -50,6 +63,18 @@ namespace LOG
 				DispatchMessage(&msg);
 			}
 		}
+	}
+
+
+
+	void Terminal::on_draw()
+	{
+
+	}
+
+	void Terminal::on_destroy()
+	{
+
 	}
 }
 

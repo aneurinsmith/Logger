@@ -26,7 +26,7 @@ if(NOT PLATFORM)
 	elseif(UNIX AND NOT APPLE)
 		set(PLATFORM "libx11")
 	endif()
-	message(STATUS "Platform detected (${PLATFORM})")
+	message(STATUS "Platform detected: ${PLATFORM}")
 	add_compile_definitions(${PLATFORM})
 endif()
 
@@ -54,7 +54,6 @@ if(PLATFORM STREQUAL "win32")
 elseif(PLATFORM STREQUAL "libx11")
 	target_link_libraries(logger -lX11)
 	target_link_libraries(logger -lXft)
-	target_link_libraries(logger -ldecor-0)
 endif()
 
 
