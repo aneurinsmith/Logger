@@ -65,6 +65,11 @@ namespace LOG
 		}
 	}
 
+	void Terminal::update()
+	{
+
+	}
+
 
 
 	void Terminal::on_draw()
