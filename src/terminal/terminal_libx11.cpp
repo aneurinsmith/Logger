@@ -17,11 +17,6 @@ namespace LOG
 		Terminal* data = (Terminal*)_data;
 
 		switch (xe->type) {
-		case ClientMessage:
-			if (xe->xclient.data.l[0] == XInternAtom(dpy, "WM_DELETE_WINDOW", False)) {
-				data->on_destroy();
-			}
-			return;
 		case ButtonPress:
 			if (xe->xbutton.button == 4) {
 				data->on_scroll(1);
@@ -32,6 +27,11 @@ namespace LOG
 			return;
 		case Expose:
 			data->on_draw();
+			return;
+		case ClientMessage:
+			if (xe->xclient.data.l[0] == XInternAtom(dpy, "WM_DELETE_WINDOW", False)) {
+				data->on_destroy();
+			}
 			return;
 		}
 	}
