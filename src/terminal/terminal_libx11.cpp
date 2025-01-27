@@ -92,7 +92,37 @@ namespace LOG
 
 	void Terminal::on_scroll(int delta)
 	{
+		// Get window geometry
+		int x, y;
+		unsigned int width, height, border_width, depth;
+		XGetGeometry(dpy, (Window)handle, &root, &x, &y, &width, &height, &border_width, &depth);
 
+		if (!msgs.empty()) {
+
+			m.lock();
+			std::string msg = *(msgs.begin() + msgsPos);
+			m.unlock();
+
+			if (delta > 0) {
+				if (linePos > 0) {
+					linePos--;
+				}
+				else if (msgsPos > 0) {
+					msgsPos--;
+					linePos = msg.size() / (width / 9);
+				}
+			}
+			else if (delta < 0) {
+				if (linePos < msg.size() / (width / 9)) {
+					linePos++;
+				}
+				else if (msgsPos < msgs.size() - 1) {
+					msgsPos++;
+					linePos = 0;
+				}
+			}
+		}
+		update();
 	}
 
 	void Terminal::on_draw()
@@ -121,8 +151,8 @@ namespace LOG
 		m.lock();
 		if (!msgs.empty()) {
 
-			int y = 1;
-			for (auto it = msgs.begin(); it != msgs.end() && y <= (height / 14); ++it) {
+			int y = 1 - linePos;
+			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (height / 14); ++it) {
 
 				std::string msg = *it;
 				for (int x = 0; x < msg.size() && y <= (height / 14); x += (width / 9), y++) {
