@@ -66,10 +66,11 @@ namespace LOG
 		void run();
 		void update();
 
+		void on_scroll(int delta);
 		void on_draw();
 		void on_destroy();
 
-		const int MAX_QUEUE = 200;
+		const int MAX_QUEUE = 20;
 		const char* WINDOW_NAME = "Logger";
 
 		int msgsPos = 0;

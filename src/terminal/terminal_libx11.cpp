@@ -22,6 +22,14 @@ namespace LOG
 				data->on_destroy();
 			}
 			return;
+		case ButtonPress:
+			if (xe->xbutton.button == 4) {
+				data->on_scroll(1);
+			}
+			else if (xe->xbutton.button == 5) {
+				data->on_scroll(-1);
+			}
+			return;
 		case Expose:
 			data->on_draw();
 			return;
@@ -53,7 +61,7 @@ namespace LOG
 			throw std::runtime_error("Could not create the window");
 		}
 
-		XSelectInput(dpy, (Window)handle, ExposureMask);
+		XSelectInput(dpy, (Window)handle, ButtonPressMask | ExposureMask);
 		XMapWindow(dpy, (Window)handle);
 		Atom wm_delete_window = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 		XSetWMProtocols(dpy, (Window)handle, &wm_delete_window, 1);
@@ -81,6 +89,11 @@ namespace LOG
 	}
 
 
+
+	void Terminal::on_scroll(int delta)
+	{
+
+	}
 
 	void Terminal::on_draw()
 	{
