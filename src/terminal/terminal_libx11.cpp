@@ -20,15 +20,17 @@ namespace LOG
 			if (xe->xclient.data.l[0] == XInternAtom(dpy, "WM_DELETE_WINDOW", False)) {
 				data->on_destroy();
 			}
-			break;
+			return;
 		case Expose:
 			data->on_draw();
-			break;
+			return;
 		}
 	}
 
 	void Terminal::init()
 	{
+		XInitThreads();
+
 		dpy = XOpenDisplay(NULL);
 		if (!dpy) {
 			throw std::runtime_error("Could not find default display");
@@ -58,19 +60,67 @@ namespace LOG
 	{
 		XEvent xe;
 		while (is_running) {
-			if (XPending(dpy)) {
-				XNextEvent(dpy, &xe);
-				HandleMessage(&xe, this);
-			}
+			XNextEvent(dpy, &xe);
+			HandleMessage(&xe, this);
 		}
 		XCloseDisplay(dpy);
+	}
+
+	void Terminal::update()
+	{
+		if (!XEventsQueued(dpy, QueuedAfterReading)) {
+			XEvent ex;
+			ex.type = Expose;
+			ex.xexpose.window = (Window)handle;
+			XSendEvent(dpy, (Window)handle, False, ExposureMask, &ex);
+		}
 	}
 
 
 
 	void Terminal::on_draw()
 	{
+		int screen = DefaultScreen(dpy);
+		Visual* visual = DefaultVisual(dpy, screen);
+		Colormap cmap = DefaultColormap(dpy, screen);
+		Pixmap drawMem = XCreatePixmap(dpy, (Window)handle,
+			DisplayWidth(dpy, screen),
+			DisplayHeight(dpy, screen),
+			DefaultDepth(dpy, screen));
+		XftDraw* draw = XftDrawCreate(dpy, drawMem, visual, cmap);
+		XftColor color;
 
+		// Get window geometry
+		int x, y;
+		unsigned int width, height, border_width, depth;
+		XGetGeometry(dpy, (Window)handle, &root, &x, &y, &width, &height, &border_width, &depth);
+
+		// Set background
+		XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &color);
+		XftDrawRect(draw, &color, 0, 0, DisplayWidth(dpy, screen), DisplayHeight(dpy, screen));
+
+		// Create font
+		XftFont* font = XftFontOpenName(dpy, 0, "Consolas:size=11");
+		XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &color);
+
+
+
+		if (!msgs.empty()) {
+			for (int i = 0, j = 1; i < msgs.back().size() && j < (height/14); i += (width/9), j++) {
+				std::string msg = msgs.back().substr(i, width/9);
+				XftDrawStringUtf8(draw, &color, font, 0, j*14, (const FcChar8*)msg.c_str(), msg.size());
+			}
+		}
+
+
+
+		// Swap buffers
+		XCopyArea(dpy, drawMem, (Window)handle, DefaultGC(dpy, screen), 0, 0, width, height, 0, 0);
+
+		XftFontClose(dpy, font);
+		XFreePixmap(dpy, drawMem);
+		XftColorFree(dpy, visual, cmap, &color);
+		XftDrawDestroy(draw);
 	}
 
 	void Terminal::on_destroy()

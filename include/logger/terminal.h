@@ -42,6 +42,7 @@ namespace LOG
 			}
 			msgs.push_back(msg);
 			if (msgsPos < msgs.size() - 1) msgsPos++;
+			update();
 			m.unlock();
 		}
 
@@ -63,6 +64,7 @@ namespace LOG
 
 		void init();
 		void run();
+		void update();
 
 		void on_draw();
 		void on_destroy();
