@@ -10,6 +10,8 @@ namespace LOG
 {
 	Display* dpy;
 	Window root;
+	int scr;
+	GC gc;
 
 	void Terminal::HandleMessage(XEvent* xe, void* _data)
 	{
@@ -30,12 +32,14 @@ namespace LOG
 	void Terminal::init()
 	{
 		XInitThreads();
+		XftInit(NULL);
 
 		dpy = XOpenDisplay(NULL);
 		if (!dpy) {
 			throw std::runtime_error("Could not find default display");
 		}
 
+		scr = DefaultScreen(dpy);
 		root = DefaultRootWindow(dpy);
 		if (!root) {
 			throw std::runtime_error("Could not find root window");
@@ -45,10 +49,11 @@ namespace LOG
 			dpy, root,
 			0, 0,
 			600, 400,
-			0, 0, 0x0C0C0C);
+			0, BlackPixel(dpy, scr), WhitePixel(dpy, scr));
 		if (!handle) {
 			throw std::runtime_error("Could not create the window");
 		}
+		gc = XCreateGC(dpy, (Window)handle, 0, NULL);
 
 		XSelectInput(dpy, (Window)handle, ExposureMask);
 		XMapWindow(dpy, (Window)handle);
@@ -80,42 +85,42 @@ namespace LOG
 
 	void Terminal::on_draw()
 	{
-		int screen = DefaultScreen(dpy);
-		Visual* visual = DefaultVisual(dpy, screen);
-		Colormap cmap = DefaultColormap(dpy, screen);
-		Pixmap drawMem = XCreatePixmap(dpy, (Window)handle,
-			DisplayWidth(dpy, screen),
-			DisplayHeight(dpy, screen),
-			DefaultDepth(dpy, screen));
-		XftDraw* draw = XftDrawCreate(dpy, drawMem, visual, cmap);
-		XftColor color;
-
 		// Get window geometry
 		int x, y;
 		unsigned int width, height, border_width, depth;
 		XGetGeometry(dpy, (Window)handle, &root, &x, &y, &width, &height, &border_width, &depth);
 
+		Visual* visual = DefaultVisual(dpy, scr);
+		Colormap cmap = DefaultColormap(dpy, scr);
+		Pixmap drawMem = XCreatePixmap(dpy, (Window)handle,
+			width,
+			height,
+			depth);
+		XftDraw* draw = XftDrawCreate(dpy, drawMem, visual, cmap);
+		XftColor color;
+
 		// Set background
 		XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &color);
-		XftDrawRect(draw, &color, 0, 0, DisplayWidth(dpy, screen), DisplayHeight(dpy, screen));
+		XftDrawRect(draw, &color, 0, 0, width, height);
 
 		// Create font
-		XftFont* font = XftFontOpenName(dpy, 0, "Consolas:size=11");
 		XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &color);
+		XftFont* font = XftFontOpenName(dpy, 0, "Consolas:size=11");
 
 
 
 		if (!msgs.empty()) {
 			for (int i = 0, j = 1; i < msgs.back().size() && j < (height/14); i += (width/9), j++) {
 				std::string msg = msgs.back().substr(i, width/9);
-				XftDrawStringUtf8(draw, &color, font, 0, j*14, (const FcChar8*)msg.c_str(), msg.size());
+				XftDrawStringUtf8(draw, &color, font, 0, j*14, 
+					(const FcChar8*)msg.c_str(), msg.size());
 			}
 		}
 
 
-
 		// Swap buffers
-		XCopyArea(dpy, drawMem, (Window)handle, DefaultGC(dpy, screen), 0, 0, width, height, 0, 0);
+		XCopyArea(dpy, drawMem, (Window)handle, gc, 0, 0, width, height, 0, 0);
+		XSetWindowBackgroundPixmap(dpy, (Window)handle, drawMem);
 
 		XftFontClose(dpy, font);
 		XFreePixmap(dpy, drawMem);
