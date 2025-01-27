@@ -76,6 +76,7 @@ namespace LOG
 			ex.type = Expose;
 			ex.xexpose.window = (Window)handle;
 			XSendEvent(dpy, (Window)handle, False, ExposureMask, &ex);
+			XFlush(dpy);
 		}
 	}
 
@@ -104,12 +105,22 @@ namespace LOG
 
 
 
+		m.lock();
 		if (!msgs.empty()) {
-			for (int i = 0, j = 1; i < msgs.back().size() && j < (height/14); i += (width/9), j++) {
-				std::string msg = msgs.back().substr(i, width/9);
-				XftDrawStringUtf8(draw, &color, font, 0, j*14, (const FcChar8*)msg.c_str(), msg.size());
+
+			int y = 1;
+			for (auto it = msgs.begin(); it != msgs.end(); ++it) {
+
+				std::string msg = *it;
+				for (int x = 0; x < msg.size() && y <= (height / 14); x += (width / 9), y++) {
+					std::string msg_substr = msg.substr(x, (width / 9));
+					XftDrawStringUtf8(draw, &color, font, 0, y * 14, (const FcChar8*)msg_substr.c_str(), msg_substr.size());
+				}
+
+				if (y > (height / 14)) break;
 			}
 		}
+		m.unlock();
 
 
 

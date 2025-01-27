@@ -42,8 +42,8 @@ namespace LOG
 			}
 			msgs.push_back(msg);
 			if (msgsPos < msgs.size() - 1) msgsPos++;
-			update();
 			m.unlock();
+			update();
 		}
 
 	private:
