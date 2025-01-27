@@ -11,7 +11,6 @@ namespace LOG
 	Display* dpy;
 	Window root;
 	int scr;
-	GC gc;
 
 	void Terminal::HandleMessage(XEvent* xe, void* _data)
 	{
@@ -49,11 +48,10 @@ namespace LOG
 			dpy, root,
 			0, 0,
 			600, 400,
-			0, BlackPixel(dpy, scr), WhitePixel(dpy, scr));
+			0, 0, 0);
 		if (!handle) {
 			throw std::runtime_error("Could not create the window");
 		}
-		gc = XCreateGC(dpy, (Window)handle, 0, NULL);
 
 		XSelectInput(dpy, (Window)handle, ExposureMask);
 		XMapWindow(dpy, (Window)handle);
@@ -92,10 +90,7 @@ namespace LOG
 
 		Visual* visual = DefaultVisual(dpy, scr);
 		Colormap cmap = DefaultColormap(dpy, scr);
-		Pixmap drawMem = XCreatePixmap(dpy, (Window)handle,
-			width,
-			height,
-			depth);
+		Pixmap drawMem = XCreatePixmap(dpy, (Window)handle, width, height, depth);
 		XftDraw* draw = XftDrawCreate(dpy, drawMem, visual, cmap);
 		XftColor color;
 
@@ -112,14 +107,14 @@ namespace LOG
 		if (!msgs.empty()) {
 			for (int i = 0, j = 1; i < msgs.back().size() && j < (height/14); i += (width/9), j++) {
 				std::string msg = msgs.back().substr(i, width/9);
-				XftDrawStringUtf8(draw, &color, font, 0, j*14, 
-					(const FcChar8*)msg.c_str(), msg.size());
+				XftDrawStringUtf8(draw, &color, font, 0, j*14, (const FcChar8*)msg.c_str(), msg.size());
 			}
 		}
 
 
+
 		// Swap buffers
-		XCopyArea(dpy, drawMem, (Window)handle, gc, 0, 0, width, height, 0, 0);
+		XCopyArea(dpy, drawMem, (Window)handle, DefaultGC(dpy, scr), 0, 0, width, height, 0, 0);
 		XSetWindowBackgroundPixmap(dpy, (Window)handle, drawMem);
 
 		XftFontClose(dpy, font);
