@@ -109,7 +109,7 @@ namespace LOG
 		if (!msgs.empty()) {
 
 			int y = 1;
-			for (auto it = msgs.begin(); it != msgs.end(); ++it) {
+			for (auto it = msgs.begin(); it != msgs.end() && y <= (height / 14); ++it) {
 
 				std::string msg = *it;
 				for (int x = 0; x < msg.size() && y <= (height / 14); x += (width / 9), y++) {
@@ -117,7 +117,6 @@ namespace LOG
 					XftDrawStringUtf8(draw, &color, font, 0, y * 14, (const FcChar8*)msg_substr.c_str(), msg_substr.size());
 				}
 
-				if (y > (height / 14)) break;
 			}
 		}
 		m.unlock();
