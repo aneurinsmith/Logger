@@ -13,6 +13,9 @@ namespace LOG
 			data = static_cast<Terminal*>(reinterpret_cast<LPCREATESTRUCT>(lpm)->lpCreateParams);
 			SetWindowLongPtrA(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(data));
 			break;
+		case WM_MOUSEWHEEL: 
+			data->on_scroll(GET_WHEEL_DELTA_WPARAM(wpm));
+			break;
 		case WM_PAINT:
 			data->on_draw();
 			break;
@@ -72,9 +75,48 @@ namespace LOG
 
 
 
-	void Terminal::on_draw()
+	void Terminal::on_scroll(int delta)
 	{
 
+	}
+
+	void Terminal::on_draw()
+	{
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint((HWND)handle, &ps);
+		HDC memDC = CreateCompatibleDC(hdc);
+		HBITMAP memBM = CreateCompatibleBitmap(hdc, ps.rcPaint.right, ps.rcPaint.bottom);
+		SelectObject(memDC, memBM);
+
+		// Set background
+		HBRUSH brush = CreateSolidBrush(0x0C0C0C);
+		FillRect(memDC, &ps.rcPaint, brush);
+
+		// Create font
+		int dpi = GetDpiForWindow((HWND)handle);
+		HFONT hf = CreateFontA((14 * dpi) / 72, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, CLIP_DEFAULT_PRECIS, 0, CLEARTYPE_QUALITY, FF_DONTCARE, (LPCSTR)"Consolas");
+		SelectObject(memDC, hf);
+
+		SetBkMode(memDC, TRANSPARENT);
+		SetTextColor(memDC, 0xCCCCCC);
+
+
+
+		RECT topMsgRect;
+		GetClientRect((HWND)handle, &topMsgRect);
+		RECT rc_size = topMsgRect;
+		DrawTextA(memDC, (LPCSTR)"done", 4, &rc_size, DT_WORDBREAK);
+
+
+
+		// Swap buffers
+		BitBlt(hdc, 0, 0, ps.rcPaint.right, ps.rcPaint.bottom, memDC, 0, 0, SRCCOPY);
+		EndPaint((HWND)handle, &ps);
+
+		DeleteObject(hf);
+		DeleteObject(brush);
+		DeleteDC(memDC);
+		DeleteObject(memBM);
 	}
 
 	void Terminal::on_destroy()

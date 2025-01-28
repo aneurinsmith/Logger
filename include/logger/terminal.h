@@ -9,7 +9,9 @@
 
 #ifdef win32
 #define WIN32_LEAN_AND_MEAN
+#define WINVER 0x0605
 #include <windows.h>
+#include <WinUser.h>
 #undef ERROR
 #elif libx11
 #include <X11/Xlib.h>
@@ -41,7 +43,7 @@ namespace LOG
 				msgs.erase(msgs.begin());
 			}
 			msgs.push_back(msg);
-			//if (msgsPos < msgs.size() - 1) msgsPos++;
+			if (msgsPos < msgs.size() - 1) msgsPos++;
 			m.unlock();
 			update();
 		}
