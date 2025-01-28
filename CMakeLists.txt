@@ -54,6 +54,7 @@ if(PLATFORM STREQUAL "win32")
 elseif(PLATFORM STREQUAL "libx11")
 	target_link_libraries(logger -lX11)
 	target_link_libraries(logger -lXft)
+	target_link_libraries(logger -lXrandr)
 endif()
 
 

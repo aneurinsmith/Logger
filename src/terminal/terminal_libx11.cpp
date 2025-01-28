@@ -2,10 +2,6 @@
 #ifdef libx11
 #include "terminal.h"
 
-#include <X11/Xutil.h>
-#include <X11/Xatom.h>
-#include <X11/Xft/Xft.h>
-
 namespace LOG
 {
 	Display* dpy;
@@ -109,11 +105,11 @@ namespace LOG
 				}
 				else if (msgsPos > 0) {
 					msgsPos--;
-					linePos = msg.size() / (width / 9);
+					linePos = msg.size() / (width / 8);
 				}
 			}
 			else if (delta < 0) {
-				if (linePos < msg.size() / (width / 9)) {
+				if (linePos < msg.size() / (width / 8)) {
 					linePos++;
 				}
 				else if (msgsPos < msgs.size() - 1) {
@@ -144,7 +140,7 @@ namespace LOG
 
 		// Create font
 		XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &color);
-		XftFont* font = XftFontOpenName(dpy, 0, "Consolas:size=11");
+		XftFont* font = XftFontOpenName(dpy, 0, "Consolas:pixelsize=14");
 
 
 
@@ -155,8 +151,8 @@ namespace LOG
 			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (height / 14); ++it) {
 
 				std::string msg = *it;
-				for (int x = 0; x < msg.size() && y <= (height / 14); x += (width / 9), y++) {
-					std::string msg_substr = msg.substr(x, (width / 9));
+				for (int x = 0; x < msg.size() && y <= (height / 14); x += (width / 8), y++) {
+					std::string msg_substr = msg.substr(x, (width / 8));
 					if(y > 0) XftDrawStringUtf8(draw, &color, font, 0, y * 14, (const FcChar8*)msg_substr.c_str(), msg_substr.size());
 				}
 
