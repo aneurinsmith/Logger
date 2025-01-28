@@ -105,7 +105,7 @@ namespace LOG
 		RECT topMsgRect;
 		GetClientRect((HWND)handle, &topMsgRect);
 		RECT rc_size = topMsgRect;
-		DrawTextA(memDC, (LPCSTR)"done", 4, &rc_size, DT_WORDBREAK);
+		DrawTextA(memDC, (LPCSTR)"Hello World!", 11, &rc_size, DT_WORDBREAK);
 
 
 
