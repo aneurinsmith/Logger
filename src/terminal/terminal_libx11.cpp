@@ -148,12 +148,12 @@ namespace LOG
 		if (!msgs.empty()) {
 
 			int y = 1 - linePos;
-			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (height / 14); ++it) {
+			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (height / 16); ++it) {
 
 				std::string msg = *it;
-				for (int x = 0; x < msg.size() && y <= (height / 14); x += (width / 8), y++) {
+				for (int x = 0; x < msg.size() && y <= (height / 16); x += (width / 8), y++) {
 					std::string msg_substr = msg.substr(x, (width / 8));
-					if(y > 0) XftDrawStringUtf8(draw, &color, font, 0, y * 14, (const FcChar8*)msg_substr.c_str(), msg_substr.size());
+					if(y > 0) XftDrawStringUtf8(draw, &color, font, 0, (y * 16) - 2, (const FcChar8*)msg_substr.c_str(), msg_substr.size());
 				}
 
 			}
