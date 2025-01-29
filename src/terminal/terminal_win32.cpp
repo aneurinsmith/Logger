@@ -9,9 +9,12 @@ namespace LOG
 		Terminal* data = reinterpret_cast<Terminal*>(::GetWindowLongPtr(wnd, GWLP_USERDATA));
 
 		switch (msg) {
-		case WM_CREATE:
+		case WM_NCCREATE:
 			data = static_cast<Terminal*>(reinterpret_cast<LPCREATESTRUCT>(lpm)->lpCreateParams);
 			SetWindowLongPtrA(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(data));
+			break;
+		case WM_SIZE: 
+			InvalidateRect((HWND)data->handle, NULL, TRUE);
 			break;
 		case WM_MOUSEWHEEL: 
 			data->on_scroll(GET_WHEEL_DELTA_WPARAM(wpm));
@@ -19,6 +22,8 @@ namespace LOG
 		case WM_PAINT:
 			data->on_draw();
 			break;
+		case WM_ERASEBKGND:
+			return TRUE;
 		case WM_DESTROY:
 			data->on_destroy();
 			break;
@@ -70,18 +75,58 @@ namespace LOG
 
 	void Terminal::update()
 	{
-
+		MSG msg;
+		if (!PeekMessageA(&msg, (HWND)handle, WM_SIZE, WM_SIZE, PM_NOREMOVE)) {
+			PostMessageA((HWND)handle, WM_SIZE, 0, 0);
+		}
 	}
 
 
 
 	void Terminal::on_scroll(int delta)
 	{
+		// Get window geometry
+		RECT client_rc;
+		GetClientRect((HWND)handle, &client_rc);
+		unsigned int width = client_rc.right, height = client_rc.bottom;
 
+		if (!msgs.empty()) {
+
+			m.lock();
+			std::string msg = *(msgs.begin() + msgsPos);
+			m.unlock();
+
+			if (delta > 0) {
+				if (linePos > 0) {
+					linePos--;
+				}
+				else if (msgsPos > 0) {
+					msgsPos--;
+					linePos = msg.size() / (width / 8);
+				}
+			}
+			else if (delta < 0) {
+				if (linePos < msg.size() / (width / 8)) {
+					linePos++;
+				}
+				else if (msgsPos < msgs.size() - 1) {
+					msgsPos++;
+					linePos = 0;
+				}
+			}
+
+		}
+
+		update();
 	}
 
 	void Terminal::on_draw()
 	{
+		// Get window geometry
+		RECT client_rc;
+		GetClientRect((HWND)handle, &client_rc);
+		unsigned int width = client_rc.right, height = client_rc.bottom;
+
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint((HWND)handle, &ps);
 		HDC memDC = CreateCompatibleDC(hdc);
@@ -102,10 +147,23 @@ namespace LOG
 
 
 
-		RECT topMsgRect;
-		GetClientRect((HWND)handle, &topMsgRect);
-		RECT rc_size = topMsgRect;
-		DrawTextA(memDC, (LPCSTR)"Hello World!", 11, &rc_size, DT_WORDBREAK);
+		m.lock();
+		if (!msgs.empty()) {
+			int y = 1 - linePos;
+			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (int)(height / 16); ++it) {
+
+				std::string msg = *it;
+				for (int x = 0; x < msg.size() && y <= (int)(height / 16); x += (width / 8), y++) {
+					std::string msg_substr = msg.substr(x, (width / 8));
+					if (y > 0) {
+						RECT msg_rc = { 0,(y-1)*16,0,0 };
+						DrawTextA(memDC, (LPCSTR)msg_substr.c_str(), -1, &msg_rc, DT_TOP | DT_NOCLIP);
+					}
+				}
+
+			}
+		}
+		m.unlock();
 
 
 
