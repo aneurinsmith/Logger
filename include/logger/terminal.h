@@ -76,7 +76,7 @@ namespace LOG
 		void on_draw();
 		void on_destroy();
 
-		const int MAX_QUEUE = 20;
+		const unsigned int MAX_QUEUE = 20;
 		const char* WINDOW_NAME = "Logger";
 
 		int msgsPos = 0;
