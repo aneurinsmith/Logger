@@ -43,11 +43,13 @@ namespace LOG
 		void push(std::string msg)
 		{
 			m.lock();
-			if (msgs.size() >= MAX_QUEUE) {
+			msgs.push_back(msg);
+			if (msgs.size() > MAX_QUEUE) {
 				msgs.erase(msgs.begin());
 			}
-			msgs.push_back(msg);
-			if (msgsPos < msgs.size() - 1) msgsPos++;
+			else if ((msgsPos < msgs.size() - 1)) {
+				msgsPos++;
+			}
 			m.unlock();
 			update();
 		}
@@ -76,7 +78,7 @@ namespace LOG
 		void on_draw();
 		void on_destroy();
 
-		const unsigned int MAX_QUEUE = 20;
+		const unsigned int MAX_QUEUE = 100;
 		const char* WINDOW_NAME = "Logger";
 
 		int msgsPos = 0;
