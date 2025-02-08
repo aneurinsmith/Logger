@@ -12,6 +12,7 @@
 #define WINVER 0x0605
 #include <windows.h>
 #include <WinUser.h>
+#include <atomic>
 #undef ERROR
 #elif libx11
 #include <X11/Xlib.h>
@@ -78,7 +79,7 @@ namespace LOG
 		void on_draw();
 		void on_destroy();
 
-		const unsigned int MAX_QUEUE = 100;
+		const unsigned int MAX_QUEUE = 20;
 		const char* WINDOW_NAME = "Logger";
 
 		int msgsPos = 0;

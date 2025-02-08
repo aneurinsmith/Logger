@@ -4,6 +4,8 @@
 
 namespace LOG
 {
+	std::atomic<bool> isUpdateScheduled(false);
+
 	LRESULT CALLBACK Terminal::HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm)
 	{
 		Terminal* data = reinterpret_cast<Terminal*>(::GetWindowLongPtr(wnd, GWLP_USERDATA));
@@ -12,11 +14,32 @@ namespace LOG
 		case WM_NCCREATE:
 			data = static_cast<Terminal*>(reinterpret_cast<LPCREATESTRUCT>(lpm)->lpCreateParams);
 			SetWindowLongPtrA(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(data));
+
+			SCROLLINFO si;
+			si.cbSize = sizeof(SCROLLINFO);
+			si.fMask = SIF_RANGE | SIF_PAGE;
+			si.nMin = 0;
+			si.nMax = data->MAX_QUEUE - 1;
+			si.nPage = 1;
+			SetScrollInfo(wnd, SB_VERT, &si, TRUE);
+
 			break;
 		case WM_SIZE: 
 			InvalidateRect((HWND)data->handle, NULL, TRUE);
 			break;
-		case WM_MOUSEWHEEL: 
+		case WM_ENTERSIZEMOVE:
+			SetTimer((HWND)data->handle, 0, 10, NULL);
+			return FALSE;
+		case WM_APP:
+		case WM_TIMER: 
+			InvalidateRect((HWND)data->handle, NULL, TRUE);
+			SetScrollPos((HWND)data->handle, SB_VERT, data->msgsPos, TRUE);
+			isUpdateScheduled = false;
+			break;
+		case WM_EXITSIZEMOVE:
+			KillTimer((HWND)data->handle, 0);
+			return FALSE;
+		case WM_MOUSEWHEEL:
 			data->on_scroll(GET_WHEEL_DELTA_WPARAM(wpm));
 			break;
 		case WM_PAINT:
@@ -34,25 +57,25 @@ namespace LOG
 
 	void Terminal::init()
 	{
-		WNDCLASSEXW wcex = {};
+		WNDCLASSEXA wcea = {};
 		
-		if (!GetClassInfoExW(GetModuleHandleW(NULL), (LPCWSTR)WINDOW_NAME, &wcex)) {
-			wcex.cbSize = sizeof(WNDCLASSEXW);
-			wcex.lpfnWndProc = HandleMessage;
-			wcex.cbClsExtra = 0;
-			wcex.cbWndExtra = 0;
-			wcex.hInstance = GetModuleHandleW(NULL);
-			wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-			wcex.lpszClassName = (LPCWSTR)WINDOW_NAME;
-			wcex.style = CS_BYTEALIGNWINDOW | CS_DBLCLKS;
+		if (!GetClassInfoExA(GetModuleHandleW(NULL), (LPCSTR)WINDOW_NAME, &wcea)) {
+			wcea.cbSize = sizeof(WNDCLASSEXW);
+			wcea.lpfnWndProc = HandleMessage;
+			wcea.cbClsExtra = 0;
+			wcea.cbWndExtra = 0;
+			wcea.hInstance = GetModuleHandleW(NULL);
+			wcea.hCursor = LoadCursor(NULL, IDC_ARROW);
+			wcea.lpszClassName = (LPCSTR)WINDOW_NAME;
+			wcea.style = CS_BYTEALIGNWINDOW | CS_DBLCLKS;
 
-			if (!RegisterClassExW(&wcex)) {
+			if (!RegisterClassExA(&wcea)) {
 				throw std::runtime_error("Window class failed to register");
 			}
 		}
 
-		handle = CreateWindowExW(0,
-			(LPCWSTR)WINDOW_NAME, (LPCWSTR)WINDOW_NAME,
+		handle = CreateWindowExA(0,
+			(LPCSTR)WINDOW_NAME, (LPCSTR)WINDOW_NAME,
 			WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_VSCROLL,
 			CW_USEDEFAULT, CW_USEDEFAULT,
 			600, 400,
@@ -66,18 +89,19 @@ namespace LOG
 	{
 		MSG msg = {};
 		while (is_running) {
-			if (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)) {
+
+			if (GetMessageA(&msg, NULL, 0, 0)) {
 				TranslateMessage(&msg);
-				DispatchMessage(&msg);
+				DispatchMessageA(&msg);
 			}
+
 		}
 	}
 
 	void Terminal::update()
 	{
-		MSG msg;
-		if (!PeekMessageA(&msg, (HWND)handle, WM_SIZE, WM_SIZE, PM_NOREMOVE)) {
-			PostMessageA((HWND)handle, WM_SIZE, 0, 0);
+		if (!isUpdateScheduled.exchange(true)) {
+			PostMessageA((HWND)handle, WM_APP, 0, 0);
 		}
 	}
 
