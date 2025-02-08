@@ -15,7 +15,7 @@ int main()
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
     std::cout << "we are now looping" << std::endl;
-    for (int i = 0; i < 30000; i++) {
+    for (int i = 0; i < 3; i++) {
         std::string msg = "Terminal window message ";
         msg += std::to_string(i);
         logger.print(LOG::TRACE, msg);

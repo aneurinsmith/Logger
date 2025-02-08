@@ -24,6 +24,8 @@
 
 namespace LOG
 {
+	struct Size { unsigned int height, width; };
+
 	class Terminal
 	{
 	public:
@@ -71,6 +73,9 @@ namespace LOG
 			data->run();
 		}
 
+		Size get_size();
+		unsigned int get_scroll();
+
 		void init();
 		void run();
 		void update();
@@ -80,7 +85,7 @@ namespace LOG
 		void on_draw();
 		void on_destroy();
 
-		const unsigned int MAX_QUEUE = 200;
+		const unsigned int MAX_QUEUE = 20;
 		const char* WINDOW_NAME = "Logger";
 
 		int msgsPos = 0;

@@ -8,6 +8,18 @@ namespace LOG
 	Window root;
 	int scr;
 
+	Size Terminal::get_size()
+	{
+		return { 0,0 };
+	}
+
+	unsigned int Terminal::get_scroll()
+	{
+		return 0;
+	}
+
+
+
 	void Terminal::HandleMessage(XEvent* xe, void* _data)
 	{
 		Terminal* data = (Terminal*)_data;

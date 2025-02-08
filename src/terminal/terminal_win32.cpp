@@ -6,6 +6,30 @@ namespace LOG
 {
 	std::atomic<bool> isUpdateScheduled(false);
 
+	Size Terminal::get_size()
+	{
+		RECT client_rc;
+		GetClientRect((HWND)handle, &client_rc);
+
+		return { 
+			(unsigned int)client_rc.bottom,
+			(unsigned int)client_rc.right 
+		};
+	}
+
+	unsigned int Terminal::get_scroll()
+	{
+		Size client_size = get_size();
+
+		std::string msg = *(msgs.begin() + msgsPos);
+		int topLineHeight = (msg.size() / (client_size.width / 8)) + 1;
+		int scrollPos = ((float)((linePos)+(msgsPos * topLineHeight)) / (((MAX_QUEUE - 1) * topLineHeight) + (topLineHeight - 1)) * MAX_QUEUE);
+
+		return scrollPos;
+	}
+
+
+
 	LRESULT CALLBACK Terminal::HandleMessage(HWND wnd, UINT msg, WPARAM wpm, LPARAM lpm)
 	{
 		Terminal* data = reinterpret_cast<Terminal*>(::GetWindowLongPtr(wnd, GWLP_USERDATA));
@@ -36,17 +60,14 @@ namespace LOG
 			}
 			case WM_VSCROLL: {
 
-				// Get window geometry
-				RECT client_rc;
-				GetClientRect((HWND)data->handle, &client_rc);
-				unsigned int width = client_rc.right, height = client_rc.bottom;
+				Size client_size = data->get_size();
 
 				if (!data->msgs.empty()) {
 
 					data->m.lock();
 					std::string m = *(data->msgs.begin() + data->msgsPos);
 					data->m.unlock();
-					int topLineHeight = (m.size() / (width / 8));
+					int topLineHeight = (m.size() / (client_size.width / 8));
 
 					switch (LOWORD(wpm)) {
 						case SB_LINEUP: {
@@ -81,9 +102,6 @@ namespace LOG
 							else {
 								data->msgsPos = data->msgs.size() - 1;
 							}
-
-							std::cout << (int)(((float)HIWORD(wpm)/1000)*data->MAX_QUEUE) << std::endl;
-
 							break;
 						}
 					}
@@ -180,20 +198,10 @@ namespace LOG
 
 	void Terminal::on_size()
 	{
-		// Get window geometry
-		RECT client_rc;
-		GetClientRect((HWND)handle, &client_rc);
-		unsigned int width = client_rc.right, height = client_rc.bottom;
+		Size client_size = get_size();
 
-		// Calculate scrollbar height
 		m.lock();
 		if (!msgs.empty()) {
-
-			std::string msg = *(msgs.begin() + msgsPos);
-			int topLineHeight = (msg.size() / (width / 8)) + 1;
-			int scrollPos = 0;
-
-			scrollPos = ((float)((linePos)+(msgsPos * topLineHeight)) / (((MAX_QUEUE - 1) * topLineHeight) + (topLineHeight - 1)) * MAX_QUEUE);
 
 			SCROLLINFO si;
 			si.cbSize = sizeof(SCROLLINFO);
@@ -201,7 +209,7 @@ namespace LOG
 			si.nMin = 0;
 			si.nMax = MAX_QUEUE;
 			si.nPage = 1;
-			si.nPos = scrollPos;
+			si.nPos = get_scroll();
 			SetScrollInfo((HWND)handle, SB_VERT, &si, TRUE);
 
 		}
@@ -210,10 +218,7 @@ namespace LOG
 
 	void Terminal::on_scroll(int delta)
 	{
-		// Get window geometry
-		RECT client_rc;
-		GetClientRect((HWND)handle, &client_rc);
-		unsigned int width = client_rc.right, height = client_rc.bottom;
+		Size client_size = get_size();
 
 		if (!msgs.empty()) {
 
@@ -227,11 +232,11 @@ namespace LOG
 				}
 				else if (msgsPos > 0) {
 					msgsPos--;
-					linePos = msg.size() / (width / 8);
+					linePos = msg.size() / (client_size.width / 8);
 				}
 			}
 			else if (delta < 0) {
-				if (linePos < msg.size() / (width / 8)) {
+				if (linePos < msg.size() / (client_size.width / 8)) {
 					linePos++;
 				}
 				else if (msgsPos < msgs.size() - 1) {
@@ -240,21 +245,14 @@ namespace LOG
 				}
 			}
 
-			int topLineHeight = (msg.size() / (width / 8)) + 1;
-			int scrollPos = 0;
-			scrollPos = ((float)((linePos)+(msgsPos * topLineHeight)) / (((MAX_QUEUE - 1) * topLineHeight) + (topLineHeight - 1)) * MAX_QUEUE);
-			SetScrollPos((HWND)handle, SB_VERT, scrollPos, TRUE);
-
+			SetScrollPos((HWND)handle, SB_VERT, get_scroll(), TRUE);
 		}
 
 	}
 
 	void Terminal::on_draw()
 	{
-		// Get window geometry
-		RECT client_rc;
-		GetClientRect((HWND)handle, &client_rc);
-		unsigned int width = client_rc.right, height = client_rc.bottom;
+		Size client_size = get_size();
 
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint((HWND)handle, &ps);
@@ -279,11 +277,11 @@ namespace LOG
 		m.lock();
 		if (!msgs.empty()) {
 			int y = 1 - linePos;
-			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (int)(height / 16); ++it) {
+			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (int)(client_size.height / 16); ++it) {
 
 				std::string msg = *it;
-				for (int x = 0; x < msg.size() && y <= (int)(height / 16); x += (width / 8), y++) {
-					std::string msg_substr = msg.substr(x, (width / 8));
+				for (int x = 0; x < msg.size() && y <= (int)(client_size.height / 16); x += (client_size.width / 8), y++) {
+					std::string msg_substr = msg.substr(x, (client_size.width / 8));
 					if (y > 0) {
 						RECT msg_rc = { 0,(y-1)*16,0,0 };
 						DrawTextA(memDC, (LPCSTR)msg_substr.c_str(), -1, &msg_rc, DT_TOP | DT_NOCLIP);
