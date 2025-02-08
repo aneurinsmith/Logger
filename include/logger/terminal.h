@@ -75,11 +75,12 @@ namespace LOG
 		void run();
 		void update();
 
+		void on_size();
 		void on_scroll(int delta);
 		void on_draw();
 		void on_destroy();
 
-		const unsigned int MAX_QUEUE = 20;
+		const unsigned int MAX_QUEUE = 200;
 		const char* WINDOW_NAME = "Logger";
 
 		int msgsPos = 0;

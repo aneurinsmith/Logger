@@ -11,45 +11,62 @@ namespace LOG
 		Terminal* data = reinterpret_cast<Terminal*>(::GetWindowLongPtr(wnd, GWLP_USERDATA));
 
 		switch (msg) {
-		case WM_NCCREATE:
-			data = static_cast<Terminal*>(reinterpret_cast<LPCREATESTRUCT>(lpm)->lpCreateParams);
-			SetWindowLongPtrA(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(data));
+			case WM_NCCREATE: {
+				data = static_cast<Terminal*>(reinterpret_cast<LPCREATESTRUCT>(lpm)->lpCreateParams);
+				SetWindowLongPtrA(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(data));
 
-			SCROLLINFO si;
-			si.cbSize = sizeof(SCROLLINFO);
-			si.fMask = SIF_RANGE | SIF_PAGE;
-			si.nMin = 0;
-			si.nMax = data->MAX_QUEUE - 1;
-			si.nPage = 1;
-			SetScrollInfo(wnd, SB_VERT, &si, TRUE);
+				SCROLLINFO si;
+				si.cbSize = sizeof(SCROLLINFO);
+				si.fMask = SIF_RANGE | SIF_PAGE;
+				si.nMin = 0;
+				si.nMax = 1000;
+				si.nPage = 1;
+				SetScrollInfo((HWND)data->handle, SB_VERT, &si, TRUE);
 
-			break;
-		case WM_SIZE: 
-			InvalidateRect((HWND)data->handle, NULL, TRUE);
-			break;
-		case WM_ENTERSIZEMOVE:
-			SetTimer((HWND)data->handle, 0, 10, NULL);
-			return FALSE;
-		case WM_APP:
-		case WM_TIMER: 
-			InvalidateRect((HWND)data->handle, NULL, TRUE);
-			SetScrollPos((HWND)data->handle, SB_VERT, data->msgsPos, TRUE);
-			isUpdateScheduled = false;
-			break;
-		case WM_EXITSIZEMOVE:
-			KillTimer((HWND)data->handle, 0);
-			return FALSE;
-		case WM_MOUSEWHEEL:
-			data->on_scroll(GET_WHEEL_DELTA_WPARAM(wpm));
-			break;
-		case WM_PAINT:
-			data->on_draw();
-			break;
-		case WM_ERASEBKGND:
-			return TRUE;
-		case WM_DESTROY:
-			data->on_destroy();
-			break;
+				break;
+			}
+			case WM_ERASEBKGND: {
+				return TRUE;
+			}
+
+			case WM_SIZE: {
+				data->on_size();
+				InvalidateRect((HWND)data->handle, NULL, TRUE);
+				break;
+			}
+			case WM_VSCROLL: {
+
+				break;
+			}
+			case WM_MOUSEWHEEL: {
+				data->on_scroll(GET_WHEEL_DELTA_WPARAM(wpm));
+				InvalidateRect((HWND)data->handle, NULL, TRUE);
+				break;
+			}
+			case WM_PAINT: {
+				data->on_draw();
+				break;
+			}
+			case WM_DESTROY: {
+				data->on_destroy();
+				break;
+			}
+
+			case WM_ENTERSIZEMOVE: {
+				SetTimer((HWND)data->handle, 0, 10, NULL);
+				return FALSE;
+			}
+			case WM_APP:
+			case WM_TIMER: {
+				data->on_size();
+				InvalidateRect((HWND)data->handle, NULL, TRUE);
+				isUpdateScheduled = false;
+				break;
+			}
+			case WM_EXITSIZEMOVE: {
+				KillTimer((HWND)data->handle, 0);
+				return FALSE;
+			}
 		}
 
 		return DefWindowProcA(wnd, msg, wpm, lpm);
@@ -107,6 +124,36 @@ namespace LOG
 
 
 
+	void Terminal::on_size()
+	{
+		// Get window geometry
+		RECT client_rc;
+		GetClientRect((HWND)handle, &client_rc);
+		unsigned int width = client_rc.right, height = client_rc.bottom;
+
+		// Calculate scrollbar height
+		m.lock();
+		if (!msgs.empty()) {
+
+			std::string msg = *(msgs.begin() + msgsPos);
+			int topLineHeight = (msg.size() / (width / 8)) + 1;
+			int scrollPos = 0;
+
+			scrollPos = ((float)((linePos)+(msgsPos * topLineHeight)) / (((MAX_QUEUE - 1) * topLineHeight) + (topLineHeight - 1)) * 1000);
+
+			SCROLLINFO si;
+			si.cbSize = sizeof(SCROLLINFO);
+			si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
+			si.nMin = 0;
+			si.nMax = 1000;
+			si.nPage = 1;
+			si.nPos = scrollPos;
+			SetScrollInfo((HWND)handle, SB_VERT, &si, TRUE);
+
+		}
+		m.unlock();
+	}
+
 	void Terminal::on_scroll(int delta)
 	{
 		// Get window geometry
@@ -139,9 +186,13 @@ namespace LOG
 				}
 			}
 
+			int topLineHeight = (msg.size() / (width / 8)) + 1;
+			int scrollPos = 0;
+			scrollPos = ((float)((linePos)+(msgsPos * topLineHeight)) / (((MAX_QUEUE - 1) * topLineHeight) + (topLineHeight - 1)) * 1000);
+			SetScrollPos((HWND)handle, SB_VERT, scrollPos, TRUE);
+
 		}
 
-		update();
 	}
 
 	void Terminal::on_draw()
