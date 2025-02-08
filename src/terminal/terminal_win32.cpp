@@ -67,7 +67,6 @@ namespace LOG
 					data->m.lock();
 					std::string m = *(data->msgs.begin() + data->msgsPos);
 					data->m.unlock();
-					int topLineHeight = (m.size() / (client_size.width / 8));
 
 					switch (LOWORD(wpm)) {
 						case SB_LINEUP: {
@@ -77,13 +76,13 @@ namespace LOG
 							else {
 								if (data->msgsPos > 0) {
 									data->msgsPos--;
-									data->linePos = topLineHeight;
+									data->linePos = m.size() / (client_size.width / 8);
 								}
 							}
 							break;
 						}
 						case SB_LINEDOWN: {
-							if (data->linePos < topLineHeight) {
+							if (data->linePos < m.size() / (client_size.width / 8)) {
 								data->linePos++;
 							}
 							else {
