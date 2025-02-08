@@ -43,7 +43,7 @@ namespace LOG
 				si.cbSize = sizeof(SCROLLINFO);
 				si.fMask = SIF_RANGE | SIF_PAGE;
 				si.nMin = 0;
-				si.nMax = data->MAX_QUEUE;
+				si.nMax = data->MAX_QUEUE-1;
 				si.nPage = 1;
 				SetScrollInfo((HWND)data->handle, SB_VERT, &si, TRUE);
 
@@ -206,7 +206,7 @@ namespace LOG
 			si.cbSize = sizeof(SCROLLINFO);
 			si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
 			si.nMin = 0;
-			si.nMax = MAX_QUEUE;
+			si.nMax = MAX_QUEUE-1;
 			si.nPage = 1;
 			si.nPos = get_scroll();
 			SetScrollInfo((HWND)handle, SB_VERT, &si, TRUE);
