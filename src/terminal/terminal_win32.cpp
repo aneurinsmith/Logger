@@ -19,7 +19,7 @@ namespace LOG
 				si.cbSize = sizeof(SCROLLINFO);
 				si.fMask = SIF_RANGE | SIF_PAGE;
 				si.nMin = 0;
-				si.nMax = 1000;
+				si.nMax = data->MAX_QUEUE;
 				si.nPage = 1;
 				SetScrollInfo((HWND)data->handle, SB_VERT, &si, TRUE);
 
@@ -36,6 +36,60 @@ namespace LOG
 			}
 			case WM_VSCROLL: {
 
+				// Get window geometry
+				RECT client_rc;
+				GetClientRect((HWND)data->handle, &client_rc);
+				unsigned int width = client_rc.right, height = client_rc.bottom;
+
+				if (!data->msgs.empty()) {
+
+					data->m.lock();
+					std::string m = *(data->msgs.begin() + data->msgsPos);
+					data->m.unlock();
+					int topLineHeight = (m.size() / (width / 8));
+
+					switch (LOWORD(wpm)) {
+						case SB_LINEUP: {
+							if (data->linePos > 0) {
+								data->linePos--;
+							}
+							else {
+								if (data->msgsPos > 0) {
+									data->msgsPos--;
+									data->linePos = topLineHeight;
+								}
+							}
+							break;
+						}
+						case SB_LINEDOWN: {
+							if (data->linePos < topLineHeight) {
+								data->linePos++;
+							}
+							else {
+								if (data->msgsPos < data->msgs.size() - 1) {
+									data->msgsPos++;
+									data->linePos = 0;
+								}
+							}
+							break;
+						}
+						case SB_THUMBTRACK:
+						case SB_THUMBPOSITION: {
+							if (HIWORD(wpm) < data->msgs.size() - 1) {
+								data->msgsPos = HIWORD(wpm);
+							}
+							else {
+								data->msgsPos = data->msgs.size() - 1;
+							}
+
+							std::cout << (int)(((float)HIWORD(wpm)/1000)*data->MAX_QUEUE) << std::endl;
+
+							break;
+						}
+					}
+					data->on_size();
+					InvalidateRect((HWND)data->handle, NULL, TRUE);
+				}
 				break;
 			}
 			case WM_MOUSEWHEEL: {
@@ -139,13 +193,13 @@ namespace LOG
 			int topLineHeight = (msg.size() / (width / 8)) + 1;
 			int scrollPos = 0;
 
-			scrollPos = ((float)((linePos)+(msgsPos * topLineHeight)) / (((MAX_QUEUE - 1) * topLineHeight) + (topLineHeight - 1)) * 1000);
+			scrollPos = ((float)((linePos)+(msgsPos * topLineHeight)) / (((MAX_QUEUE - 1) * topLineHeight) + (topLineHeight - 1)) * MAX_QUEUE);
 
 			SCROLLINFO si;
 			si.cbSize = sizeof(SCROLLINFO);
 			si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
 			si.nMin = 0;
-			si.nMax = 1000;
+			si.nMax = MAX_QUEUE;
 			si.nPage = 1;
 			si.nPos = scrollPos;
 			SetScrollInfo((HWND)handle, SB_VERT, &si, TRUE);
@@ -188,7 +242,7 @@ namespace LOG
 
 			int topLineHeight = (msg.size() / (width / 8)) + 1;
 			int scrollPos = 0;
-			scrollPos = ((float)((linePos)+(msgsPos * topLineHeight)) / (((MAX_QUEUE - 1) * topLineHeight) + (topLineHeight - 1)) * 1000);
+			scrollPos = ((float)((linePos)+(msgsPos * topLineHeight)) / (((MAX_QUEUE - 1) * topLineHeight) + (topLineHeight - 1)) * MAX_QUEUE);
 			SetScrollPos((HWND)handle, SB_VERT, scrollPos, TRUE);
 
 		}
