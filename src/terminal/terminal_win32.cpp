@@ -20,12 +20,29 @@ namespace LOG
 	unsigned int Terminal::get_scroll()
 	{
 		Size client_size = get_size();
+		unsigned int scrollPos = 0;
 
-		std::string msg = *(msgs.begin() + msgsPos);
-		int topLineHeight = (msg.size() / (client_size.width / 8)) + 1;
-		int scrollPos = ((float)((linePos)+(msgsPos * topLineHeight)) / (((MAX_QUEUE - 1) * topLineHeight) + (topLineHeight - 1)) * MAX_QUEUE);
+		m.lock();
+		if (!msgs.empty()) {
+			std::string topMsg = *(msgs.begin() + msgsPos);
+			int topMsgHeight = (topMsg.size() / (client_size.width / 8)) + 1;
+			scrollPos = ((float)((linePos)+(msgsPos * topMsgHeight)) / (((MAX_QUEUE - 1) * topMsgHeight) + (topMsgHeight - 1)) * 1000);
+		}
+		m.unlock();
 
 		return scrollPos;
+	}
+
+	void Terminal::set_scroll(unsigned int scrollPos)
+	{
+		SCROLLINFO si;
+		si.cbSize = sizeof(SCROLLINFO);
+		si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
+		si.nMin = 0;
+		si.nMax = 1000;
+		si.nPage = 1;
+		si.nPos = scrollPos;
+		SetScrollInfo((HWND)handle, SB_VERT, &si, TRUE);
 	}
 
 
@@ -39,13 +56,7 @@ namespace LOG
 				data = static_cast<Terminal*>(reinterpret_cast<LPCREATESTRUCT>(lpm)->lpCreateParams);
 				SetWindowLongPtrA(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(data));
 
-				SCROLLINFO si;
-				si.cbSize = sizeof(SCROLLINFO);
-				si.fMask = SIF_RANGE | SIF_PAGE;
-				si.nMin = 0;
-				si.nMax = data->MAX_QUEUE-1;
-				si.nPage = 1;
-				SetScrollInfo((HWND)data->handle, SB_VERT, &si, TRUE);
+				data->set_scroll(0);
 
 				break;
 			}
@@ -65,7 +76,7 @@ namespace LOG
 				if (!data->msgs.empty()) {
 
 					data->m.lock();
-					std::string m = *(data->msgs.begin() + data->msgsPos);
+					std::string topMsg = *(data->msgs.begin() + data->msgsPos);
 					data->m.unlock();
 
 					switch (LOWORD(wpm)) {
@@ -76,13 +87,13 @@ namespace LOG
 							else {
 								if (data->msgsPos > 0) {
 									data->msgsPos--;
-									data->linePos = m.size() / (client_size.width / 8);
+									data->linePos = topMsg.size() / (client_size.width / 8);
 								}
 							}
 							break;
 						}
 						case SB_LINEDOWN: {
-							if (data->linePos < m.size() / (client_size.width / 8)) {
+							if (data->linePos < topMsg.size() / (client_size.width / 8)) {
 								data->linePos++;
 							}
 							else {
@@ -95,8 +106,10 @@ namespace LOG
 						}
 						case SB_THUMBTRACK:
 						case SB_THUMBPOSITION: {
-							if (HIWORD(wpm) < data->msgs.size() - 1) {
-								data->msgsPos = HIWORD(wpm);
+							int adjustedPos = (int)((data->MAX_QUEUE-1) * ((float)HIWORD(wpm) / 1000));
+
+							if (adjustedPos < data->msgs.size() - 1) {
+								data->msgsPos = adjustedPos;
 							}
 							else {
 								data->msgsPos = data->msgs.size() - 1;
@@ -201,18 +214,18 @@ namespace LOG
 
 		m.lock();
 		if (!msgs.empty()) {
+			std::string topMsg = *(msgs.begin() + msgsPos);
+			int topMsgHeight = (topMsg.size() - 1) / (client_size.width / 8);
 
-			SCROLLINFO si;
-			si.cbSize = sizeof(SCROLLINFO);
-			si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
-			si.nMin = 0;
-			si.nMax = MAX_QUEUE-1;
-			si.nPage = 1;
-			si.nPos = get_scroll();
-			SetScrollInfo((HWND)handle, SB_VERT, &si, TRUE);
-
+			if (msgsPos == MAX_QUEUE-1) {
+				if (linePos > topMsgHeight) {
+					linePos--;
+				}
+			}
 		}
 		m.unlock();
+
+		set_scroll(get_scroll());
 	}
 
 	void Terminal::on_scroll(int delta)
@@ -222,7 +235,7 @@ namespace LOG
 		if (!msgs.empty()) {
 
 			m.lock();
-			std::string msg = *(msgs.begin() + msgsPos);
+			std::string topMsg = *(msgs.begin() + msgsPos);
 			m.unlock();
 
 			if (delta > 0) {
@@ -231,11 +244,11 @@ namespace LOG
 				}
 				else if (msgsPos > 0) {
 					msgsPos--;
-					linePos = msg.size() / (client_size.width / 8);
+					linePos = topMsg.size() / (client_size.width / 8);
 				}
 			}
 			else if (delta < 0) {
-				if (linePos < msg.size() / (client_size.width / 8)) {
+				if (linePos < topMsg.size() / (client_size.width / 8)) {
 					linePos++;
 				}
 				else if (msgsPos < msgs.size() - 1) {
@@ -244,7 +257,7 @@ namespace LOG
 				}
 			}
 
-			SetScrollPos((HWND)handle, SB_VERT, get_scroll(), TRUE);
+			set_scroll(get_scroll());
 		}
 
 	}

@@ -75,6 +75,7 @@ namespace LOG
 
 		Size get_size();
 		unsigned int get_scroll();
+		void set_scroll(unsigned int scrollPos);
 
 		void init();
 		void run();
