@@ -215,7 +215,7 @@ namespace LOG
 		m.lock();
 		if (!msgs.empty()) {
 			std::string topMsg = *(msgs.begin() + msgsPos);
-			int topMsgHeight = (topMsg.size() - 1) / (client_size.width / 8);
+			int topMsgHeight = topMsg.size() / (client_size.width / 8);
 
 			if (msgsPos == MAX_QUEUE-1) {
 				if (linePos > topMsgHeight) {
