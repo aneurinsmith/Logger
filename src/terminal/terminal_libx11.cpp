@@ -10,7 +10,14 @@ namespace LOG
 
 	Size Terminal::get_size()
 	{
-		return { 0,0 };
+		int x, y;
+		unsigned int width, height, border_width, depth;
+		XGetGeometry(dpy, (Window)handle, &root, &x, &y, &width, &height, &border_width, &depth);
+
+		return { 
+			height,
+			width 
+		};
 	}
 
 	unsigned int Terminal::get_scroll()
@@ -98,12 +105,14 @@ namespace LOG
 
 
 
+	void Terminal::on_size()
+	{
+
+	}
+
 	void Terminal::on_scroll(int delta)
 	{
-		// Get window geometry
-		int x, y;
-		unsigned int width, height, border_width, depth;
-		XGetGeometry(dpy, (Window)handle, &root, &x, &y, &width, &height, &border_width, &depth);
+		Size client_size = get_size();
 
 		if (!msgs.empty()) {
 
@@ -117,11 +126,11 @@ namespace LOG
 				}
 				else if (msgsPos > 0) {
 					msgsPos--;
-					linePos = msg.size() / (width / 8);
+					linePos = msg.size() / (client_size.width / 8);
 				}
 			}
 			else if (delta < 0) {
-				if (linePos < msg.size() / (width / 8)) {
+				if (linePos < msg.size() / (client_size.width / 8)) {
 					linePos++;
 				}
 				else if (msgsPos < msgs.size() - 1) {
@@ -136,20 +145,17 @@ namespace LOG
 
 	void Terminal::on_draw()
 	{
-		// Get window geometry
-		int x, y;
-		unsigned int width, height, border_width, depth;
-		XGetGeometry(dpy, (Window)handle, &root, &x, &y, &width, &height, &border_width, &depth);
+		Size client_size = get_size();
 
 		Visual* visual = DefaultVisual(dpy, scr);
 		Colormap cmap = DefaultColormap(dpy, scr);
-		Pixmap drawMem = XCreatePixmap(dpy, (Window)handle, width, height, depth);
+		Pixmap drawMem = XCreatePixmap(dpy, (Window)handle, client_size.width, client_size.height, 24);
 		XftDraw* draw = XftDrawCreate(dpy, drawMem, visual, cmap);
 		XftColor color;
 
 		// Set background
 		XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &color);
-		XftDrawRect(draw, &color, 0, 0, width, height);
+		XftDrawRect(draw, &color, 0, 0, client_size.width, client_size.height);
 
 		// Create font
 		XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &color);
@@ -161,11 +167,11 @@ namespace LOG
 		if (!msgs.empty()) {
 
 			int y = 1 - linePos;
-			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (int)(height / 16); ++it) {
+			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (int)(client_size.height / 16); ++it) {
 
 				std::string msg = *it;
-				for (int x = 0; x < msg.size() && y <= (int)(height / 16); x += (width / 8), y++) {
-					std::string msg_substr = msg.substr(x, (width / 8));
+				for (int x = 0; x < msg.size() && y <= (int)(client_size.height / 16); x += (client_size.width / 8), y++) {
+					std::string msg_substr = msg.substr(x, (client_size.width / 8));
 					if(y > 0) XftDrawStringUtf8(draw, &color, font, 0, (y * 16) - 2, (const FcChar8*)msg_substr.c_str(), msg_substr.size());
 				}
 
@@ -176,7 +182,7 @@ namespace LOG
 
 
 		// Swap buffers
-		XCopyArea(dpy, drawMem, (Window)handle, DefaultGC(dpy, scr), 0, 0, width, height, 0, 0);
+		XCopyArea(dpy, drawMem, (Window)handle, DefaultGC(dpy, scr), 0, 0, client_size.width, client_size.height, 0, 0);
 		XSetWindowBackgroundPixmap(dpy, (Window)handle, drawMem);
 
 		XftFontClose(dpy, font);
