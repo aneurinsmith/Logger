@@ -25,6 +25,11 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y libx11-dev libxft-dev libxrandr-dev
+
+    - name: Create symbolic link
+      run: |
+        sudo ln -s /usr/include/freetype2/ft2build.h /usr/include
+        sudo ln -s /usr/include/freetype2/freetype /usr/include
     
     - name: Set reusable strings
       id: strings
