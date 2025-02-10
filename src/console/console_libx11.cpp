@@ -129,14 +129,21 @@ namespace LOG
 			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (int)(get_height()/16); ++it) {
 
 				std::string msg = *it;
-				for (int x = 0; x < msg.size() && y <= (int)(get_height()/16); x += (get_width()/8), y++) {
-					std::string msg_substr = msg.substr(x, (get_width()/8));
+				for (int x = 0; x < msg.size() && y <= (int)(get_height()/16); x += ((get_width()-16)/8), y++) {
+					std::string msg_substr = msg.substr(x, ((get_width()-16)/8));
 					if (y > 0) XftDrawStringUtf8(draw, &color, font, 0, (y * 16) - 2, (const FcChar8*)msg_substr.c_str(), msg_substr.size());
 				}
 
 			}
 		}
 		m.unlock();
+
+		// Draw scrollbar
+		XftColorAllocName(dpy, visual, cmap, "#171717", &color);
+		XftDrawRect(draw, &color, get_width()-16, 0, 16, get_height());
+
+		XftColorAllocName(dpy, visual, cmap, "#4D4D4D", &color);
+		XftDrawRect(draw, &color, get_width()-16, (get_height()-20) * (float)get_scrollPos()/100, 16, 20);
 
 		// Swap buffers
 		XCopyArea(dpy, drawMem, (Window)handle, DefaultGC(dpy, scr), 0, 0, get_width(), get_height(), 0, 0);
