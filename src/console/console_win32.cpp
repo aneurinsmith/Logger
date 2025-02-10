@@ -4,8 +4,6 @@
 
 namespace LOG
 {
-	std::atomic<bool> isUpdateScheduled(false);
-
 	unsigned int Console::get_width()
 	{
 		RECT client_rc;
@@ -78,7 +76,7 @@ namespace LOG
 		case WM_TIMER:
 			SetScrollPos((HWND)data->handle, SB_VERT, data->get_scrollPos(), TRUE);
 			InvalidateRect((HWND)data->handle, NULL, TRUE);
-			isUpdateScheduled = false;
+			data->isUpdateScheduled = false;
 			break;
 		case WM_EXITSIZEMOVE:
 			KillTimer((HWND)data->handle, 0);
@@ -92,12 +90,12 @@ namespace LOG
 	{
 		WNDCLASSEXA wcea = {};
 
-		if (!GetClassInfoExA(GetModuleHandleW(NULL), (LPCSTR)WINDOW_NAME, &wcea)) {
+		if (!GetClassInfoExA(GetModuleHandleA(NULL), (LPCSTR)WINDOW_NAME, &wcea)) {
 			wcea.cbSize = sizeof(WNDCLASSEXW);
 			wcea.lpfnWndProc = HandleMessage;
 			wcea.cbClsExtra = 0;
 			wcea.cbWndExtra = 0;
-			wcea.hInstance = GetModuleHandleW(NULL);
+			wcea.hInstance = GetModuleHandleA(NULL);
 			wcea.hCursor = LoadCursor(NULL, IDC_ARROW);
 			wcea.lpszClassName = (LPCSTR)WINDOW_NAME;
 			wcea.style = CS_BYTEALIGNWINDOW | CS_DBLCLKS;
@@ -109,10 +107,10 @@ namespace LOG
 
 		handle = CreateWindowExA(0,
 			(LPCSTR)WINDOW_NAME, (LPCSTR)WINDOW_NAME,
-			WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_VSCROLL,
+			WS_OVERLAPPEDWINDOW |  WS_VISIBLE | WS_VSCROLL,
 			CW_USEDEFAULT, CW_USEDEFAULT,
 			600, 400,
-			0, (HMENU)0, GetModuleHandleW(NULL), (void*)this);
+			0, (HMENU)0, GetModuleHandleA(NULL), (void*)this);
 		if (!handle) {
 			throw std::runtime_error("Window creation failed");
 		}

@@ -7,12 +7,12 @@
 #include <condition_variable>
 #include <cmath>
 #include <iostream>
+#include <atomic>
 
 #ifdef win32
 	#define WIN32_LEAN_AND_MEAN
 	#define WINVER 0x0605
 	#include <Windows.h>
-	#include <atomic>
 	#undef ERROR
 #elif libx11
 	#include <X11/Xlib.h>
@@ -28,7 +28,8 @@ namespace LOG
 	{
 	public:
 
-		Console()
+		Console() : 
+			isUpdateScheduled(false)
 		{
 			std::unique_lock<std::mutex> lk(m);
 			thread = std::thread(&Console::ThreadStart, this);
@@ -90,7 +91,6 @@ namespace LOG
 				if (msgsPos == MAX_QUEUE - 1) {
 					if (linePos > topMsgHeight) {
 						linePos--;
-						std::cout << linePos << std::endl;
 					}
 				}
 			}
@@ -184,6 +184,8 @@ namespace LOG
 		std::vector<std::string> msgs;
 		std::condition_variable cv;
 		std::mutex m;
+
+		std::atomic<bool> isUpdateScheduled;
 
 	};
 }

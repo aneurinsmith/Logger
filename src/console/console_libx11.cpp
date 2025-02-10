@@ -167,10 +167,14 @@ namespace LOG
 
 		// Draw scrollbar
 		XftColorAllocName(dpy, visual, cmap, "#171717", &color);
-		XftDrawRect(draw, &color, get_width()-16, 0, 16, get_height());
+		XftDrawRect(draw, &color, 
+			get_width()-16, 0, 
+			16, get_height());
 
 		XftColorAllocName(dpy, visual, cmap, "#4D4D4D", &color);
-		XftDrawRect(draw, &color, get_width()-16, (get_height()-20) * (float)get_scrollPos()/100, 16, 20);
+		XftDrawRect(draw, &color, 
+			get_width()-16, (get_height()-20) * (float)get_scrollPos()/100, 
+			16, 20);
 
 		// Swap buffers
 		XCopyArea(dpy, drawMem, (Window)handle, DefaultGC(dpy, scr), 0, 0, get_width(), get_height(), 0, 0);

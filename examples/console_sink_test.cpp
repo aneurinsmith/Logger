@@ -10,13 +10,12 @@ int main()
 {
     std::cout << "app start" << std::endl;
     logger.add_sink(LOG::consoleSink(LOG::NONE));
-    //logger.add_sink(LOG::oStreamSink(LOG::NONE));
+    logger.add_sink(LOG::consoleSink(LOG::NONE));
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
     std::cout << "we are now looping" << std::endl;
-    for (int i = 0; i < 3000; i++) {
-        //std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    for (int i = 0; i < 10000; i++) {
         std::string msg = "Terminal window message ";
         msg += std::to_string(i);
         logger.print(LOG::TRACE, msg);
