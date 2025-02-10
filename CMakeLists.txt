@@ -1,5 +1,5 @@
 ﻿
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.12)
 project (Logger)
 
 include(GenerateExportHeader)
@@ -24,9 +24,9 @@ if(NOT PLATFORM)
 	if(WIN32)
 		set(PLATFORM "win32")
 	elseif(UNIX AND NOT APPLE)
-		set(PLATFORM "x11")
+		set(PLATFORM "libx11")
 	endif()
-	message(STATUS "Platform detected (${PLATFORM})")
+	message(STATUS "Platform detected: ${PLATFORM}")
 	add_compile_definitions(${PLATFORM})
 endif()
 
@@ -45,6 +45,17 @@ target_include_directories(logger INTERFACE
 	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger>"
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/logger>"
 )
+
+# link platform libraries to logger
+if(PLATFORM STREQUAL "win32")
+	target_link_libraries(logger -lcomctl32)
+	target_link_libraries(logger -luxtheme)
+	target_link_libraries(logger -ldwmapi)
+elseif(PLATFORM STREQUAL "libx11")
+	target_link_libraries(logger -lX11)
+	target_link_libraries(logger -lXft)
+	target_link_libraries(logger -lXrandr)
+endif()
 
 
 
