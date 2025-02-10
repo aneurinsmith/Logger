@@ -49,6 +49,9 @@ target_include_directories(logger INTERFACE
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/logger>"
 )
 
+# add platform definition to targets file
+target_compile_definitions(logger INTERFACE ${PLATFORM})
+
 # link platform libraries to logger
 if(PLATFORM STREQUAL "win32")
 	target_link_libraries(logger -lcomctl32)
