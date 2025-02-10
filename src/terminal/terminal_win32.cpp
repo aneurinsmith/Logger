@@ -1,6 +1,7 @@
 
 #ifdef win32
 #include "terminal.h"
+#include <cmath>
 
 namespace LOG
 {
@@ -78,6 +79,7 @@ namespace LOG
 					data->m.lock();
 					std::string topMsg = *(data->msgs.begin() + data->msgsPos);
 					data->m.unlock();
+					int topMsgHeight = topMsg.size() / (client_size.width / 8);
 
 					switch (LOWORD(wpm)) {
 						case SB_LINEUP: {
@@ -106,13 +108,11 @@ namespace LOG
 						}
 						case SB_THUMBTRACK:
 						case SB_THUMBPOSITION: {
-							int adjustedPos = (int)((data->MAX_QUEUE-1) * ((float)HIWORD(wpm) / 1000));
+							float adjustedPos = (float)(data->MAX_QUEUE - 0.01) * ((float)HIWORD(wpm) / 1000);
 
-							if (adjustedPos < data->msgs.size() - 1) {
-								data->msgsPos = adjustedPos;
-							}
-							else {
-								data->msgsPos = data->msgs.size() - 1;
+							if (adjustedPos < data->msgs.size()) {
+								data->msgsPos = (int)adjustedPos;
+								data->linePos = std::round(topMsgHeight * (adjustedPos - (int)adjustedPos));
 							}
 							break;
 						}
