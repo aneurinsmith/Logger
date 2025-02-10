@@ -1,6 +1,6 @@
 
 #ifdef libx11
-#include "terminal.h"
+#include "console.h"
 
 namespace LOG
 {
@@ -8,50 +8,50 @@ namespace LOG
 	Window root;
 	int scr;
 
-	Size Terminal::get_size()
+	unsigned int Console::get_width()
 	{
 		int x, y;
 		unsigned int width, height, border_width, depth;
 		XGetGeometry(dpy, (Window)handle, &root, &x, &y, &width, &height, &border_width, &depth);
-
-		return { 
-			height,
-			width 
-		};
+		return width;
 	}
 
-	unsigned int Terminal::get_scroll()
+	unsigned int Console::get_height()
 	{
-		return 0;
+		int x, y;
+		unsigned int width, height, border_width, depth;
+		XGetGeometry(dpy, (Window)handle, &root, &x, &y, &width, &height, &border_width, &depth);
+		return height;
 	}
 
-
-
-	void Terminal::HandleMessage(XEvent* xe, void* _data)
+	void Console::HandleMessage(XEvent* xe, void* _data)
 	{
-		Terminal* data = (Terminal*)_data;
+		Console* data = (Console*)_data;
 
 		switch (xe->type) {
 		case ButtonPress:
 			if (xe->xbutton.button == 4) {
-				data->on_scroll(1);
+				data->scroll_up();
 			}
 			else if (xe->xbutton.button == 5) {
-				data->on_scroll(-1);
+				data->scroll_down();
 			}
-			return;
 		case Expose:
 			data->on_draw();
-			return;
+			break;
+		case ConfigureNotify:
+			data->on_size();
+			break;
+
 		case ClientMessage:
 			if (xe->xclient.data.l[0] == XInternAtom(dpy, "WM_DELETE_WINDOW", False)) {
 				data->on_destroy();
 			}
-			return;
+			break;
 		}
 	}
 
-	void Terminal::init()
+	void Console::init()
 	{
 		XInitThreads();
 		XftInit(NULL);
@@ -76,13 +76,13 @@ namespace LOG
 			throw std::runtime_error("Could not create the window");
 		}
 
-		XSelectInput(dpy, (Window)handle, ButtonPressMask | ExposureMask);
+		XSelectInput(dpy, (Window)handle, ButtonPressMask | ExposureMask | StructureNotifyMask);
 		XMapWindow(dpy, (Window)handle);
 		Atom wm_delete_window = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 		XSetWMProtocols(dpy, (Window)handle, &wm_delete_window, 1);
 	}
 
-	void Terminal::run()
+	void Console::run()
 	{
 		XEvent xe;
 		while (is_running) {
@@ -92,7 +92,7 @@ namespace LOG
 		XCloseDisplay(dpy);
 	}
 
-	void Terminal::update()
+	void Console::update()
 	{
 		if (!XEventsQueued(dpy, QueuedAfterReading)) {
 			XEvent ex;
@@ -105,84 +105,41 @@ namespace LOG
 
 
 
-	void Terminal::on_size()
+	void Console::on_draw()
 	{
-
-	}
-
-	void Terminal::on_scroll(int delta)
-	{
-		Size client_size = get_size();
-
-		if (!msgs.empty()) {
-
-			m.lock();
-			std::string msg = *(msgs.begin() + msgsPos);
-			m.unlock();
-
-			if (delta > 0) {
-				if (linePos > 0) {
-					linePos--;
-				}
-				else if (msgsPos > 0) {
-					msgsPos--;
-					linePos = msg.size() / (client_size.width / 8);
-				}
-			}
-			else if (delta < 0) {
-				if (linePos < msg.size() / (client_size.width / 8)) {
-					linePos++;
-				}
-				else if (msgsPos < msgs.size() - 1) {
-					msgsPos++;
-					linePos = 0;
-				}
-			}
-		}
-
-		update();
-	}
-
-	void Terminal::on_draw()
-	{
-		Size client_size = get_size();
-
 		Visual* visual = DefaultVisual(dpy, scr);
 		Colormap cmap = DefaultColormap(dpy, scr);
-		Pixmap drawMem = XCreatePixmap(dpy, (Window)handle, client_size.width, client_size.height, 24);
+		Pixmap drawMem = XCreatePixmap(dpy, (Window)handle, get_width(), get_height(), 24);
 		XftDraw* draw = XftDrawCreate(dpy, drawMem, visual, cmap);
 		XftColor color;
 
 		// Set background
 		XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &color);
-		XftDrawRect(draw, &color, 0, 0, client_size.width, client_size.height);
+		XftDrawRect(draw, &color, 0, 0, get_width(), get_height());
 
 		// Create font
 		XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &color);
 		XftFont* font = XftFontOpenName(dpy, 0, "Consolas:pixelsize=14");
 
-
-
+		// Render messages
 		m.lock();
 		if (!msgs.empty()) {
 
 			int y = 1 - linePos;
-			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (int)(client_size.height / 16); ++it) {
+			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (int)(get_height()/16); ++it) {
 
 				std::string msg = *it;
-				for (int x = 0; x < msg.size() && y <= (int)(client_size.height / 16); x += (client_size.width / 8), y++) {
-					std::string msg_substr = msg.substr(x, (client_size.width / 8));
-					if(y > 0) XftDrawStringUtf8(draw, &color, font, 0, (y * 16) - 2, (const FcChar8*)msg_substr.c_str(), msg_substr.size());
+				for (int x = 0; x < msg.size() && y <= (int)(get_height()/16); x += (get_width()/8), y++) {
+					std::string msg_substr = msg.substr(x, (get_width()/8));
+					if (y > 0) XftDrawStringUtf8(draw, &color, font, 0, (y * 16) - 2, (const FcChar8*)msg_substr.c_str(), msg_substr.size());
 				}
 
 			}
 		}
 		m.unlock();
 
-
-
 		// Swap buffers
-		XCopyArea(dpy, drawMem, (Window)handle, DefaultGC(dpy, scr), 0, 0, client_size.width, client_size.height, 0, 0);
+		XCopyArea(dpy, drawMem, (Window)handle, DefaultGC(dpy, scr), 0, 0, get_width(), get_height(), 0, 0);
 		XSetWindowBackgroundPixmap(dpy, (Window)handle, drawMem);
 
 		XftFontClose(dpy, font);
@@ -191,7 +148,7 @@ namespace LOG
 		XftDrawDestroy(draw);
 	}
 
-	void Terminal::on_destroy()
+	void Console::on_destroy()
 	{
 		XDestroyWindow(dpy, (Window)handle);
 	}

@@ -4,9 +4,9 @@
 #include <memory>
 #include <vector>
 
+#include "console_sink.h"
 #include "fstream_sink.h"
 #include "ostream_sink.h"
-#include "terminal_sink.h"
 
 namespace LOG 
 {
