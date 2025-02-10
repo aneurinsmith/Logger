@@ -28,8 +28,7 @@ namespace LOG
 	{
 	public:
 
-		Console() : 
-			isUpdateScheduled(false)
+		Console()
 		{
 			std::unique_lock<std::mutex> lk(m);
 			thread = std::thread(&Console::ThreadStart, this);
@@ -60,8 +59,17 @@ namespace LOG
 
 		// Window methods and variables
 		void* handle;
-		const unsigned int MAX_QUEUE = 20;
+		const unsigned int MAX_QUEUE = 100;
 		const char* WINDOW_NAME = "Log Viewer";
+
+	#ifdef win32
+		std::atomic<bool> isUpdateScheduled;
+	#elif libx11
+		Display* dpy;
+		Window root;
+		int scr;
+		bool is_dragging = false;
+	#endif
 
 		static void ThreadStart(void* _data)
 		{
@@ -148,7 +156,7 @@ namespace LOG
 			if (!msgs.empty()) {
 				std::string topMsg = *(msgs.begin() + msgsPos);
 				int topMsgHeight = topMsg.size() / (get_width()/8);
-				float adjustedPos = (float)(MAX_QUEUE - 0.01) * ((float)scrollPos / 100);
+				float adjustedPos = (float)(MAX_QUEUE - 0.01) * ((float)scrollPos / 10000);
 
 				if (adjustedPos < msgs.size()) {
 					msgsPos = (int)adjustedPos;
@@ -168,7 +176,7 @@ namespace LOG
 				int topMsgHeight = (topMsg.size() / (get_width()/8)) + 1;
 				scrollPos = ((float)(linePos+(msgsPos * topMsgHeight)) 
 							/ (((MAX_QUEUE - 1) * topMsgHeight) + (topMsgHeight - 1)))
-							* 100;
+							* 10000;
 			}
 			m.unlock();
 
@@ -184,8 +192,5 @@ namespace LOG
 		std::vector<std::string> msgs;
 		std::condition_variable cv;
 		std::mutex m;
-
-		std::atomic<bool> isUpdateScheduled;
-
 	};
 }
