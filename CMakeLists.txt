@@ -40,6 +40,9 @@ endif()
 file(GLOB_RECURSE logger_src "src/*.cpp")
 add_library (logger STATIC ${logger_src})
 
+# create an alias target for the logger library
+add_library(logger::logger ALIAS logger)
+
 # set include directory for header files
 target_include_directories(logger INTERFACE
 	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger>"
@@ -85,7 +88,7 @@ install(FILES
 
 # install cmake targets file
 install(EXPORT loggerTargets
-	FILE loggerTargets.cmake
+	FILE "loggerTargets.cmake"
 	DESTINATION "${CMAKE_INSTALL_DATADIR}/logger"
 	NAMESPACE logger::
 )
