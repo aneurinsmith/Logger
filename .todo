@@ -1,7 +1,9 @@
 
-Create a custom console that can launch with win32 or x11
-
 Fix message timestamp discrepency (issue on github)
 
 Allow loggers to be named
 	Allow fstream name to be used as the output directory
+
+Improve fStreamSink
+
+Allow coloured console output where possible
