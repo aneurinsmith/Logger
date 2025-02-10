@@ -4,12 +4,6 @@
 
 namespace LOG
 {
-	Display* dpy;
-	Window root;
-	int scr;
-
-	bool is_dragging = false;
-
 	unsigned int Console::get_width()
 	{
 		int x, y;
@@ -36,7 +30,7 @@ namespace LOG
 			break;
 		case ButtonPress:
 			if (xe->xbutton.x > data->get_width() - 20) {
-				is_dragging = true;
+				data->is_dragging = true;
 			}
 			if (xe->xbutton.button == 4) {
 				data->scroll_up();
@@ -47,20 +41,20 @@ namespace LOG
 			data->on_draw();
 			break;
 		case ButtonRelease:
-			is_dragging = false;
+			data->is_dragging = false;
 			break;
 
 		case MotionNotify: {
-			if (is_dragging) {
+			if (data->is_dragging) {
 				int y = xe->xmotion.y;
 				if (y < 0) {
 					data->set_scrollPos(0);
 				}
 				else if (y > data->get_height()) {
-					data->set_scrollPos(100);
+					data->set_scrollPos(10000);
 				}
 				else {
-					data->set_scrollPos(((float)y / data->get_height()) * 100);
+					data->set_scrollPos(((float)y / data->get_height()) * 10000);
 				}
 			}
 			data->on_draw();
@@ -71,7 +65,7 @@ namespace LOG
 			break;
 
 		case ClientMessage:
-			if (xe->xclient.data.l[0] == XInternAtom(dpy, "WM_DELETE_WINDOW", False)) {
+			if (xe->xclient.data.l[0] == XInternAtom(data->dpy, "WM_DELETE_WINDOW", False)) {
 				data->on_destroy();
 			}
 			break;
@@ -80,8 +74,10 @@ namespace LOG
 
 	void Console::init()
 	{
-		XInitThreads();
 		XftInit(NULL);
+		if (!XInitThreads()) {
+			throw std::runtime_error("Could not init multithreaded xlib");
+		}
 
 		dpy = XOpenDisplay(NULL);
 		if (!dpy) {
@@ -132,6 +128,7 @@ namespace LOG
 
 
 
+	std::mutex draw_mutex;
 	void Console::on_draw()
 	{
 		Visual* visual = DefaultVisual(dpy, scr);
@@ -151,16 +148,18 @@ namespace LOG
 		// Render messages
 		m.lock();
 		if (!msgs.empty()) {
-
 			int y = 1 - linePos;
 			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (int)(get_height()/16); ++it) {
 
 				std::string msg = *it;
 				for (int x = 0; x < msg.size() && y <= (int)(get_height()/16); x += ((get_width()-16)/8), y++) {
 					std::string msg_substr = msg.substr(x, ((get_width()-16)/8));
-					if (y > 0) XftDrawStringUtf8(draw, &color, font, 0, (y * 16) - 2, (const FcChar8*)msg_substr.c_str(), msg_substr.size());
+					if (y > 0) {
+						draw_mutex.lock();
+						XftDrawStringUtf8(draw, &color, font, 0, (y * 16) - 2, (const XftChar8*)msg_substr.c_str(), msg_substr.size());
+						draw_mutex.unlock();
+					}
 				}
-
 			}
 		}
 		m.unlock();
@@ -173,7 +172,7 @@ namespace LOG
 
 		XftColorAllocName(dpy, visual, cmap, "#4D4D4D", &color);
 		XftDrawRect(draw, &color, 
-			get_width()-16, (get_height()-20) * (float)get_scrollPos()/100, 
+			get_width()-16, (get_height()-20) * (float)get_scrollPos()/10000, 
 			16, 20);
 
 		// Swap buffers
