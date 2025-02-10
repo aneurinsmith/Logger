@@ -8,7 +8,7 @@ namespace LOG
 	class ConsoleSink : public basesink
 	{
 	public:
-		ConsoleSink(LOG::Level lvl, std::string fmt);
+		using basesink::basesink;
 
 	protected:
 		void write(std::string msg);
