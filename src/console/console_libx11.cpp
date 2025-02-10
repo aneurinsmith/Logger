@@ -8,6 +8,8 @@ namespace LOG
 	Window root;
 	int scr;
 
+	bool is_dragging = false;
+
 	unsigned int Console::get_width()
 	{
 		int x, y;
@@ -29,16 +31,41 @@ namespace LOG
 		Console* data = (Console*)_data;
 
 		switch (xe->type) {
+		case Expose:
+			data->on_draw();
+			break;
 		case ButtonPress:
+			if (xe->xbutton.x > data->get_width() - 20) {
+				is_dragging = true;
+			}
 			if (xe->xbutton.button == 4) {
 				data->scroll_up();
 			}
 			else if (xe->xbutton.button == 5) {
 				data->scroll_down();
 			}
-		case Expose:
 			data->on_draw();
 			break;
+		case ButtonRelease:
+			is_dragging = false;
+			break;
+
+		case MotionNotify: {
+			if (is_dragging) {
+				int y = xe->xmotion.y;
+				if (y < 0) {
+					data->set_scrollPos(0);
+				}
+				else if (y > data->get_height()) {
+					data->set_scrollPos(100);
+				}
+				else {
+					data->set_scrollPos(((float)y / data->get_height()) * 100);
+				}
+			}
+			data->on_draw();
+			break;
+		}
 		case ConfigureNotify:
 			data->on_size();
 			break;
@@ -76,7 +103,7 @@ namespace LOG
 			throw std::runtime_error("Could not create the window");
 		}
 
-		XSelectInput(dpy, (Window)handle, ButtonPressMask | ExposureMask | StructureNotifyMask);
+		XSelectInput(dpy, (Window)handle, ButtonPressMask | ButtonReleaseMask | ButtonMotionMask | ExposureMask | StructureNotifyMask);
 		XMapWindow(dpy, (Window)handle);
 		Atom wm_delete_window = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 		XSetWMProtocols(dpy, (Window)handle, &wm_delete_window, 1);
