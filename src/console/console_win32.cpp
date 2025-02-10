@@ -33,6 +33,7 @@ namespace LOG
 		case WM_SIZE:
 			data->on_size();
 			SetScrollPos((HWND)data->handle, SB_VERT, data->get_scrollPos(), TRUE);
+			SetScrollRange((HWND)data->handle, SB_VERT, 0, 10000, FALSE);
 			InvalidateRect((HWND)data->handle, NULL, TRUE);
 			break;
 		case WM_PAINT:
@@ -56,6 +57,7 @@ namespace LOG
 				break;
 			}
 			SetScrollPos((HWND)data->handle, SB_VERT, data->get_scrollPos(), TRUE);
+			SetScrollRange((HWND)data->handle, SB_VERT, 0, 10000, FALSE);
 			InvalidateRect((HWND)data->handle, NULL, TRUE);
 			break;
 		case WM_MOUSEWHEEL:
@@ -66,6 +68,7 @@ namespace LOG
 				data->scroll_down();
 			}
 			SetScrollPos((HWND)data->handle, SB_VERT, data->get_scrollPos(), TRUE);
+			SetScrollRange((HWND)data->handle, SB_VERT, 0, 10000, FALSE);
 			InvalidateRect((HWND)data->handle, NULL, TRUE);
 			break;
 
@@ -75,6 +78,7 @@ namespace LOG
 		case WM_APP:
 		case WM_TIMER:
 			SetScrollPos((HWND)data->handle, SB_VERT, data->get_scrollPos(), TRUE);
+			SetScrollRange((HWND)data->handle, SB_VERT, 0, 10000, FALSE);
 			InvalidateRect((HWND)data->handle, NULL, TRUE);
 			data->isUpdateScheduled = false;
 			break;
@@ -88,6 +92,7 @@ namespace LOG
 
 	void Console::init()
 	{
+		isUpdateScheduled = false;
 		WNDCLASSEXA wcea = {};
 
 		if (!GetClassInfoExA(GetModuleHandleA(NULL), (LPCSTR)WINDOW_NAME, &wcea)) {
