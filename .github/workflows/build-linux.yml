@@ -1,5 +1,5 @@
 
-name: build (linux)
+name: Build (linux)
 
 on:
   push:
