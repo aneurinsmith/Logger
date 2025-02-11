@@ -47,6 +47,8 @@ target_include_directories(logger INTERFACE
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/logger>"
 )
 
+target_sources(logger PRIVATE ${logger_src})
+
 # add platform definition to targets file
 target_compile_definitions(logger INTERFACE ${PLATFORM})
 
