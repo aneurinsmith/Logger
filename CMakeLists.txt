@@ -6,6 +6,7 @@ include(GenerateExportHeader)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include_directories("include/logger")
+include_directories("src/console")
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -37,13 +38,13 @@ endif()
 #--------------------#
 
 # create the liblogger library
-file(GLOB_RECURSE logger_src "src/*.cpp")
+file(GLOB_RECURSE logger_src "src/*.cpp" "src/*.h")
 add_library (logger STATIC ${logger_src})
 
 # set include directory for header files
 target_include_directories(logger INTERFACE
-	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger/logger.h>"
-	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/logger/logger.h>"
+	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger>"
+	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/logger>"
 )
 
 # add platform definition to targets file
