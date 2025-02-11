@@ -38,7 +38,7 @@ endif()
 #--------------------#
 
 # create the liblogger library
-file(GLOB_RECURSE logger_src "src/*.cpp" "src/*.h")
+file(GLOB_RECURSE logger_src "src/*.cpp")
 add_library (logger STATIC ${logger_src})
 
 # set include directory for header files
@@ -46,6 +46,9 @@ target_include_directories(logger INTERFACE
 	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger>"
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/logger>"
 )
+
+file(GLOB_RECURSE logger_headers "src/*.h")
+target_sources(logger PUBLIC "$<BUILD_INTERFACE:${logger_headers}>")
 
 # add platform definition to targets file
 target_compile_definitions(logger INTERFACE ${PLATFORM})
