@@ -62,9 +62,8 @@ namespace LOG
 		const unsigned int MAX_QUEUE = 100;
 		const char* WINDOW_NAME = "Log Viewer";
 
-	#ifdef win32
 		std::atomic<bool> isUpdateScheduled;
-	#elif libx11
+	#ifdef libx11
 		Display* dpy;
 		Window root;
 		int scr;

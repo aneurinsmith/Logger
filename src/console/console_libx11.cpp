@@ -26,6 +26,7 @@ namespace LOG
 
 		switch (xe->type) {
 		case Expose:
+			data->isUpdateScheduled = false;
 			data->on_draw();
 			break;
 		case ButtonPress:
@@ -74,6 +75,7 @@ namespace LOG
 
 	void Console::init()
 	{
+		isUpdateScheduled = false;
 		XftInit(NULL);
 		if (!XInitThreads()) {
 			throw std::runtime_error("Could not init multithreaded xlib");
@@ -117,7 +119,7 @@ namespace LOG
 
 	void Console::update()
 	{
-		if (!XEventsQueued(dpy, QueuedAfterReading)) {
+		if (!isUpdateScheduled.exchange(true)) {
 			XEvent ex;
 			ex.type = Expose;
 			ex.xexpose.window = (Window)handle;
