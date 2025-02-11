@@ -40,9 +40,6 @@ endif()
 file(GLOB_RECURSE logger_src "src/*.cpp")
 add_library (logger STATIC ${logger_src})
 
-# create an alias target for the logger library
-add_library(logger::logger ALIAS logger)
-
 # set include directory for header files
 target_include_directories(logger INTERFACE
 	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger>"
@@ -50,7 +47,7 @@ target_include_directories(logger INTERFACE
 )
 
 # add platform definition to targets file
-target_compile_definitions(logger INTERFACE ${PLATFORM})
+target_compile_definitions(logger PRIVATE ${PLATFORM})
 
 # link platform libraries to logger
 if(PLATFORM STREQUAL "win32")
