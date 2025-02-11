@@ -6,6 +6,7 @@ include(GenerateExportHeader)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include_directories("include/logger")
+include_directories("src/console")
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -44,6 +45,10 @@ add_library (logger STATIC ${logger_src})
 target_include_directories(logger INTERFACE
 	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger>"
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/logger>"
+)
+
+target_include_directories(logger PRIVATE
+	"${CMAKE_CURRENT_SOURCE_DIR}/src/console"
 )
 
 # add platform definition to targets file
