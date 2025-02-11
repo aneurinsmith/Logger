@@ -46,8 +46,6 @@ target_include_directories(logger
 	INTERFACE
 	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger>"
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/logger>"
-	PRIVATE
-	"${CMAKE_CURRENT_SOURCE_DIR}/src/console"
 )
 
 # add platform definition to targets file
