@@ -7,7 +7,7 @@
 
 The full list of releases can be found [here](https://github.com/aneurinsmith/Logger/releases).\
 _CMake version 3.12 is required_. 
-```cmake
+```
 include(FetchContent)
 FetchContent_Declare(logger URL https://github.com/aneurinsmith/Logger/releases/download/v0.2.1/logger-src.zip)
 FetchContent_MakeAvailable(logger)
