@@ -42,12 +42,12 @@ add_library (logger STATIC ${logger_src})
 
 # set include directory for header files
 target_include_directories(logger INTERFACE
-	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger>"
-	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/logger>"
+	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger/logger.h>"
+	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/logger/logger.h>"
 )
 
 # add platform definition to targets file
-target_compile_definitions(logger PRIVATE ${PLATFORM})
+target_compile_definitions(logger INTERFACE ${PLATFORM})
 
 # link platform libraries to logger
 if(PLATFORM STREQUAL "win32")
