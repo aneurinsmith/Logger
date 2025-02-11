@@ -1,5 +1,5 @@
 
-name: Build (windows)
+name: build (windows)
 
 on:
   push:
