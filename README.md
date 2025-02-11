@@ -15,8 +15,7 @@ FetchContent_MakeAvailable(logger)
 
 ## Output sinks
 
-Each output sink has a corresponding inline factory for easy instantiation.\
-Once linked to a logger with `add_sink()`, all messages recieved by the parent logger will be redirected to the sink.
+Each output sink has a corresponding inline factory for easy instantiation.
  * `LOG::fStreamSink`
  * `LOG::oStreamSink`
  * `LOG::consoleSink`
