@@ -1,20 +1,20 @@
 
 #pragma once
 #include "base_sink.h"
-#include "console.h"
 
 namespace LOG
 {
+	class Console;
 	class ConsoleSink : public basesink
 	{
 	public:
-		using basesink::basesink;
+		ConsoleSink(LOG::Level lvl, std::string fmt);
 
 	protected:
 		void write(std::string msg);
 
 	private:
-		Console console;
+		Console* console;
 	};
 
 	inline std::shared_ptr<ConsoleSink> consoleSink(LOG::Level lvl = (Level)0, std::string fmt = "%Y/%m/%d %H:%M:%S.%f")

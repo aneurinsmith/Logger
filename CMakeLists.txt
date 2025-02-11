@@ -42,12 +42,11 @@ file(GLOB_RECURSE logger_src "src/*.cpp")
 add_library (logger STATIC ${logger_src})
 
 # set include directory for header files
-target_include_directories(logger INTERFACE
+target_include_directories(logger 
+	INTERFACE
 	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger>"
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/logger>"
-)
-
-target_include_directories(logger PRIVATE
+	PRIVATE
 	"${CMAKE_CURRENT_SOURCE_DIR}/src/console"
 )
 

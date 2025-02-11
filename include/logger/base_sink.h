@@ -24,7 +24,7 @@ namespace LOG
 		friend class Logger;
 	public:
 
-		basesink(LOG::Level lvl = (Level)0, std::string fmt = "%Y/%m/%d %H:%M:%S.%f") :
+		basesink(LOG::Level lvl, std::string fmt) :
 			m_lvl(lvl),
 			m_fmt(fmt) {}
 
