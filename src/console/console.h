@@ -1,5 +1,6 @@
 
 #pragma once
+#include "base_sink.h"
 #include <thread>
 #include <string>
 #include <vector>
@@ -41,7 +42,7 @@ namespace LOG
 			thread.join();
 		}
 
-		void push(std::string msg)
+		void push(Message msg)
 		{
 			m.lock();
 			msgs.push_back(msg);
@@ -92,7 +93,7 @@ namespace LOG
 		{
 			m.lock();
 			if (!msgs.empty()) {
-				std::string topMsg = *(msgs.begin() + msgsPos);
+				std::string topMsg = (*(msgs.begin() + msgsPos)).msg;
 				int topMsgHeight = topMsg.size() / (get_width() / 8);
 
 				if (msgsPos == MAX_QUEUE - 1) {
@@ -119,7 +120,7 @@ namespace LOG
 		{
 			m.lock();
 			if (!msgs.empty()) {
-				std::string topMsg = *(msgs.begin() + msgsPos);
+				std::string topMsg = (*(msgs.begin() + msgsPos)).msg;
 
 				if (linePos > 0) {
 					linePos--;
@@ -136,7 +137,7 @@ namespace LOG
 		{
 			m.lock();
 			if (!msgs.empty()) {
-				std::string topMsg = *(msgs.begin() + msgsPos);
+				std::string topMsg = (*(msgs.begin() + msgsPos)).msg;
 
 				if (linePos < topMsg.size() / (get_width()/8)) {
 					linePos++;
@@ -153,7 +154,7 @@ namespace LOG
 		{
 			m.lock();
 			if (!msgs.empty()) {
-				std::string topMsg = *(msgs.begin() + msgsPos);
+				std::string topMsg = (*(msgs.begin() + msgsPos)).msg;
 				int topMsgHeight = topMsg.size() / (get_width()/8);
 				float adjustedPos = (float)(MAX_QUEUE - 0.01) * ((float)scrollPos / 10000);
 
@@ -171,7 +172,7 @@ namespace LOG
 
 			m.lock();
 			if (!msgs.empty()) {
-				std::string topMsg = *(msgs.begin() + msgsPos);
+				std::string topMsg = (*(msgs.begin() + msgsPos)).msg;
 				int topMsgHeight = (topMsg.size() / (get_width()/8)) + 1;
 				scrollPos = ((float)(linePos+(msgsPos * topMsgHeight)) 
 							/ (((MAX_QUEUE - 1) * topMsgHeight) + (topMsgHeight - 1)))
@@ -188,7 +189,7 @@ namespace LOG
 		bool is_running = true;
 		std::thread thread;
 		
-		std::vector<std::string> msgs;
+		std::vector<Message> msgs;
 		std::condition_variable cv;
 		std::mutex m;
 	};

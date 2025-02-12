@@ -4,14 +4,13 @@
 
 namespace LOG
 {
-	OStreamSink::OStreamSink(LOG::Level lvl, std::string fmt) :
-		basesink(lvl, fmt) 
+	OStreamSink::OStreamSink()
 	{
 
 	}
 
-	void OStreamSink::write(std::string msg)
+	void OStreamSink::print(Message msg)
 	{
-		std::cout << msg << std::endl;
+		std::cout << msg.msg << std::endl;
 	}
 }

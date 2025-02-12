@@ -4,13 +4,13 @@
 
 namespace LOG
 {
-	ConsoleSink::ConsoleSink(LOG::Level lvl, std::string fmt) : 
-		basesink(lvl, fmt), console(new Console()) 
+	ConsoleSink::ConsoleSink() : 
+		console(new Console()) 
 	{
 
 	}
 
-	void ConsoleSink::write(std::string msg)
+	void ConsoleSink::print(Message msg)
 	{
 		console->push(msg);
 	}

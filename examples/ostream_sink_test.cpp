@@ -6,8 +6,8 @@ LOG::Logger logger;
 int main() 
 {
     auto oss = LOG::oStreamSink(LOG::DEBUG);
-    oss->print(LOG::DEBUG, "This message will be logged to the output stream sink");
-    oss->print(LOG::TRACE, "This message, however, is too low level to be logged");
+    //oss->print(LOG::DEBUG, "This message will be logged to the output stream sink");
+    //oss->print(LOG::TRACE, "This message, however, is too low level to be logged");
 
     logger.add_sink(oss);
     logger.print(LOG::DEBUG, "Multiple sinks can be added to a logger");

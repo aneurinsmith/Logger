@@ -153,7 +153,7 @@ namespace LOG
 			int y = 1 - linePos;
 			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (int)(get_height()/16); ++it) {
 
-				std::string msg = *it;
+				std::string msg = (*it).msg;
 				for (int x = 0; x < msg.size() && y <= (int)(get_height()/16); x += ((get_width()-16)/8), y++) {
 					std::string msg_substr = msg.substr(x, ((get_width()-16)/8));
 					if (y > 0) {

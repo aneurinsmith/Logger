@@ -1,5 +1,7 @@
 ﻿
 #include "logger.h"
+#include "timer.h"
+#include <iostream>
 
 namespace LOG 
 {
@@ -22,23 +24,37 @@ namespace LOG
 	void Logger::set_level(LOG::Level lvl) 
 	{
 		m_lvl = lvl;
-		for (auto& sink : sinks) {
-			sink->set_level(lvl);
-		}
 	}
 
 	void Logger::set_format(std::string fmt) 
 	{
 		m_fmt = fmt;
-		for (auto& sink : sinks) {
-			sink->set_format(fmt);
-		}
 	}
 
 	void Logger::print(LOG::Level lvl, std::string msg) 
 	{
-		for (auto sink : sinks) {
-			sink->print(lvl, msg);
+		if (lvl >= m_lvl) {
+			std::string timestamp = Timer::get_datetime(m_fmt);
+			std::string log_level = "";
+
+			switch (lvl) {
+			case LOG::TRACE: log_level = "[TRACE]"; break;
+			case LOG::DEBUG: log_level = "[DEBUG]"; break;
+			case LOG::INFO:  log_level = " [INFO]"; break;
+			case LOG::WARN:  log_level = " [WARN]"; break;
+			case LOG::ERROR: log_level = "[ERROR]"; break;
+			case LOG::FATAL: log_level = "[FATAL]"; break;
+			case LOG::NONE: break;
+			}
+
+			Message m;
+			m.msg = msg;
+			m.lvl = lvl;
+			m.ts = Timer::get_datetime(m_fmt);
+
+			for (auto sink : sinks) {
+				sink->print(m);
+			}
 		}
 	}
 
