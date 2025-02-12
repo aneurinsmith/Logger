@@ -1,14 +1,13 @@
 
 #pragma once
 #include "base_sink.h"
-#include <memory>
 
 namespace LOG
 {
 	class OStreamSink : public basesink
 	{
 	public:
-		using basesink::basesink;
+		OStreamSink(LOG::Level lvl, std::string fmt);
 
 	protected:
 		void write(std::string msg);

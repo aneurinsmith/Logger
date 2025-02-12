@@ -1,19 +1,14 @@
 
 #include "console_sink.h"
-#include "console.h"
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
-#ifdef win32
-#include <Windows.h>
-#endif
+#include "../console/console.h"
 
 namespace LOG
 {
 	ConsoleSink::ConsoleSink(LOG::Level lvl, std::string fmt) : 
-		basesink(lvl, fmt), console(new Console()) {}
+		basesink(lvl, fmt), console(new Console()) 
+	{
+
+	}
 
 	void ConsoleSink::write(std::string msg)
 	{

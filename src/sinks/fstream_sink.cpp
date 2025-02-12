@@ -4,6 +4,12 @@
 
 namespace LOG
 {
+	FStreamSink::FStreamSink(LOG::Level lvl, std::string fmt) :
+		basesink(lvl, fmt) 
+	{
+		
+	}
+
 	void FStreamSink::write(std::string msg)
 	{
 		std::fstream file;
