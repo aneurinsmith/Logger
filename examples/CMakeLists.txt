@@ -1,4 +1,7 @@
 
+add_executable (Timer "timer_test.cpp")
+target_link_libraries(Timer logger)
+
 add_executable (FStreamSink "fstream_sink_test.cpp")
 target_link_libraries(FStreamSink logger)
 
