@@ -3,15 +3,19 @@
 #include <thread>
 
 LOG::Logger logger1;
+LOG::Logger logger2;
 
 int main() 
 {
     auto oss1 = LOG::oStreamSink();
-    auto cs = LOG::consoleSink();
+    auto cs = LOG::consoleSink("%B %d %Y %H:%M");
 
     logger1.add_sink(oss1);
     logger1.add_sink(cs);
-    logger1.print(LOG::DEBUG, "Multiple sinks can be added to a logger");
+    logger2.add_sink(cs);
+    logger1.print(LOG::NONE, "Multiple sinks can be added to a logger");
+    logger2.print(LOG::INFO, "The console logger has a different datetime format");
+
     logger1.set_level(LOG::NONE);
     logger1.print(LOG::TRACE, "At this level, all messages will be logged");
     logger1.set_level(LOG::FATAL);
