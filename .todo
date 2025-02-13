@@ -5,5 +5,3 @@ Allow loggers to be named
 	Allow fstream name to be used as the output directory
 
 Improve fStreamSink
-
-Allow coloured console output where possible
