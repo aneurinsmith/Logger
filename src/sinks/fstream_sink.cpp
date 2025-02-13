@@ -1,22 +1,31 @@
 
 #include "fstream_sink.h"
+#include "timer.h"
 #include <iostream>
+#include <iomanip>
+#include <filesystem>
+
+#ifdef win32
+	#include <windows.h>
+	#include <shlobj.h>
+#endif
 
 namespace LOG
 {
-	FStreamSink::FStreamSink(std::string fmt) :
-		basesink(fmt)
+	FStreamSink::FStreamSink(std::string name, std::string fmt) :
+		basesink(fmt),
+		m_name(name + ".log")
 	{
-		file.open("log.txt", std::ios::out);
+		m_file.open(m_name, std::ios::out);
 	}
 
 	FStreamSink::~FStreamSink()
 	{
-		file.close();
+		m_file.close();
 	}
 
 	void FStreamSink::write(Message msg)
 	{
-		file << msg.get_fullString() << std::endl;
+		m_file << msg.get_fullString() << std::endl;
 	}
 }

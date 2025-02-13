@@ -2,13 +2,13 @@
 #include <logger.h>
 #include <thread>
 
-LOG::Logger logger(LOG::oStreamSink());
+LOG::Logger logger(LOG::fStreamSink("session"));
+LOG::Logger ossLogger(LOG::oStreamSink());
 
 int main()
 {
-    logger.add_sink(LOG::fStreamSink());
     for (int i = 0; i < 100; i++) {
-        LOG::debug("Hello World!");
+        logger.print(LOG::DEBUG, "Hello World!");
     }
 
     return 0;
