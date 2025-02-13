@@ -13,16 +13,16 @@ int main()
     logger1.add_sink(oss1);
     logger1.add_sink(cs);
     logger2.add_sink(cs);
-    logger1.print(LOG::NONE, "Multiple sinks can be added to a logger");
     logger2.print(LOG::INFO, "The console logger has a different datetime format");
+    logger1.print(LOG::NONE, "Multiple sinks can be added to a logger");
 
     logger1.set_level(LOG::NONE);
-    logger1.print(LOG::TRACE, "At this level, all messages will be logged");
+    logger1.print(LOG::NONE, "At this level, all messages will be logged");
     logger1.set_level(LOG::FATAL);
-    logger1.print(LOG::DEBUG, "At this level, only fatal message will be shown");
+    logger1.print(LOG::NONE, "At this level, only fatal message will be shown");
     logger1.set_level(LOG::NONE);
 
-    LOG::debug("All sinks that are added to a logger can be logged to using the inline funtions");
+    LOG::print("All sinks that are added to a logger can be logged to using the inline funtions");
 
     LOG::print("none");
     LOG::trace("trace");
