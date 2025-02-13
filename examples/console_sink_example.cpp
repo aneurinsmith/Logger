@@ -2,7 +2,6 @@
 #include <logger.h>
 #include <timer.h>
 #include <thread>
-#include <iostream>
 
 LOG::Logger consoleLogger;
 LOG::Logger ossLogger(LOG::oStreamSink());
