@@ -177,52 +177,42 @@ namespace LOG
 			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (int)(get_height()/16); ++it) {
 				
 				Message m = *it;
-				std::string lvl_text = "";
-				std::string tab = std::string(8 - (m.ts.length() % 8), ' ');
-				if (m.lvl != LOG::NONE) m.msg = "  " + m.msg;
 
 				int x = 0;
 				XftColorAllocName(dpy, visual, cmap, "#767676", &textColor);
-				draw_text(draw, font, m.ts, x, y, get_width(), get_height(), &textColor, &bgColor);
-				draw_text(draw, font, tab, x, y, get_width(), get_height(), &textColor, &bgColor);
+				draw_text(draw, font, m.get_tsString(), x, y, get_width(), get_height(), &textColor, &bgColor);
 
-				switch (m.lvl) {
+				switch (m.get_lvl()) {
 				case LOG::TRACE:
-					lvl_text = "[TRACE]";
 					XftColorAllocName(dpy, visual, cmap, "#767676", &textColor);
 					XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &lvlColor);
 					break;
 				case LOG::DEBUG:
-					lvl_text = "[DEBUG]";
 					XftColorAllocName(dpy, visual, cmap, "#F2F2F2", &textColor);
 					XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &lvlColor);
 					break;
 				case LOG::INFO:
-					lvl_text = " [INFO]";
 					XftColorAllocName(dpy, visual, cmap, "#F2F2F2", &textColor);
 					XftColorAllocName(dpy, visual, cmap, "#3A96DD", &lvlColor);
 					break;
 				case LOG::WARN:
-					lvl_text = " [WARN]";
 					XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &textColor);
 					XftColorAllocName(dpy, visual, cmap, "#C19C00", &lvlColor);
 					break;
 				case LOG::ERROR:
-					lvl_text = "[ERROR]";
 					XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &textColor);
 					XftColorAllocName(dpy, visual, cmap, "#E74856", &lvlColor);
 					break;
 				case LOG::FATAL:
-					lvl_text = "[FATAL]";
 					XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &textColor);
 					XftColorAllocName(dpy, visual, cmap, "#C50F1F", &lvlColor);
 					break;
 				}
 
-				draw_text(draw, font, lvl_text, x, y, get_width(), get_height(), &textColor, &lvlColor);
+				draw_text(draw, font, m.get_lvlString(), x, y, get_width(), get_height(), &textColor, &lvlColor);
 
 				XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &textColor);
-				draw_text(draw, font, m.msg, x, y, get_width(), get_height(), &textColor, &bgColor);
+				draw_text(draw, font, m.get_msgString(), x, y, get_width(), get_height(), &textColor, &bgColor);
 				y++;
 			}
 		}

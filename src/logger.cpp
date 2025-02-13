@@ -40,15 +40,10 @@ namespace LOG
 	void Logger::print(LOG::Level lvl, std::string msg) 
 	{
 		if (lvl >= m_lvl) {
-			Message m;
-			m.msg = msg;
-			m.lvl = lvl;
-
-			std::uint64_t epoch = Timer::get_epoch();
+			Message m(msg, lvl, m_fmt);
 
 			for (auto sink : sinks) {
 				if (lvl >= sink->m_lvl) {
-					m.ts = Timer::get_datetime(sink->m_fmt, epoch);
 					sink->write(m);
 				}
 			}

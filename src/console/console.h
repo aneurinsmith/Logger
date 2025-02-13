@@ -116,22 +116,7 @@ namespace LOG
 		std::string get_topMsg()
 		{
 			Message m = *(msgs.begin() + msgsPos);
-			std::string log_level = "";
-
-			switch (m.lvl) {
-			case LOG::TRACE: log_level = "[TRACE]"; break;
-			case LOG::DEBUG: log_level = "[DEBUG]"; break;
-			case LOG::INFO:  log_level = " [INFO]"; break;
-			case LOG::WARN:  log_level = " [WARN]"; break;
-			case LOG::ERROR: log_level = "[ERROR]"; break;
-			case LOG::FATAL: log_level = "[FATAL]"; break;
-			}
-			if (m.lvl != LOG::NONE) m.msg = "  " + m.msg;
-
-			std::string tab = std::string(8 - (m.ts.length() % 8), ' ');
-			std::string msg = m.ts + tab + log_level + m.msg;
-
-			return msg;
+			return m.get_fullString();
 		}
 
 

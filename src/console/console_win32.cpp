@@ -196,48 +196,38 @@ namespace LOG
 			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (int)(get_height()/16); ++it) {
 				
 				Message m = *it;
-				std::string lvl_text = "";
-				std::string tab = std::string(8 - (m.ts.length() % 8), ' ');
-				if (m.lvl != LOG::NONE) m.msg = "  " + m.msg;
 				COLORREF textColor = 0xCCCCCC, bgColor = TRANSPARENT;
 
 				int x = 0;
-				draw_text(memDC, m.ts, x, y, get_width(), get_height(), 0x767676);
-				draw_text(memDC, tab, x, y, get_width(), get_height());
+				draw_text(memDC, m.get_tsString(), x, y, get_width(), get_height(), 0x767676);
 
-				switch (m.lvl) {
+				switch (m.get_lvl()) {
 				case LOG::TRACE:
-					lvl_text = "[TRACE]";
 					textColor = 0x767676;
 					break;
 				case LOG::DEBUG:
-					lvl_text = "[DEBUG]";
 					textColor = 0xF2F2F2;
 					break;
 				case LOG::INFO:
-					lvl_text = " [INFO]";
 					textColor = 0xF2F2F2;
 					bgColor = 0xDD963A;
 					break;
 				case LOG::WARN:
-					lvl_text = " [WARN]";
 					textColor = 0x0C0C0C;
 					bgColor = 0x009CC1;
 					break;
 				case LOG::ERROR:
-					lvl_text = "[ERROR]";
 					textColor = 0xCCCCCC;
 					bgColor = 0x5648E7;
 					break;
 				case LOG::FATAL:
-					lvl_text = "[FATAL]";
 					textColor = 0xCCCCCC;
 					bgColor = 0x1F0FC5;
 					break;
 				}
 
-				draw_text(memDC, lvl_text, x, y, get_width(), get_height(), textColor, bgColor);
-				draw_text(memDC, m.msg, x, y, get_width(), get_height(), 0xCCCCCC);
+				draw_text(memDC, m.get_lvlString(), x, y, get_width(), get_height(), textColor, bgColor);
+				draw_text(memDC, m.get_msgString(), x, y, get_width(), get_height(), 0xCCCCCC);
 				y++;
 			}
 		}
