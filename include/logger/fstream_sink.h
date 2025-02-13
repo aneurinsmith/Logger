@@ -8,7 +8,7 @@ namespace LOG
 	class FStreamSink : public basesink
 	{
 	public:
-		FStreamSink();
+		FStreamSink(std::string fmt);
 		~FStreamSink();
 
 	protected:
@@ -19,9 +19,9 @@ namespace LOG
 
 	};
 
-	inline std::shared_ptr<FStreamSink> fStreamSink()
+	inline std::shared_ptr<FStreamSink> fStreamSink(std::string fmt = "%Y/%m/%d %H:%M:%S.%f")
 	{
-		auto sink = std::make_shared<FStreamSink>();
+		auto sink = std::make_shared<FStreamSink>(fmt);
 		return sink;
 	}
 }

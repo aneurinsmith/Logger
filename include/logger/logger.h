@@ -15,22 +15,24 @@ namespace LOG
 	{
 	public:
 
-		Logger(LOG::Level lvl = (Level)0, std::string fmt = "%Y/%m/%d %H:%M:%S.%f");
-		Logger(std::shared_ptr<basesink> sink, LOG::Level lvl = (Level)0, std::string fmt = "%Y/%m/%d %H:%M:%S.%f");
+		Logger(LOG::Level lvl = (Level)0);
+		Logger(std::shared_ptr<basesink> sink, LOG::Level lvl = (Level)0);
 
 		static Logger& instance();
 
 		void set_level(LOG::Level lvl);
-		void set_format(std::string fmt);
 
 		void print(LOG::Level lvl, std::string msg);
 
 		void add_sink(std::shared_ptr<basesink> sink);
 
 	protected:
-		std::vector<std::shared_ptr<basesink>> sinks;
+		std::vector<std::shared_ptr<basesink>> m_sinks;
 		std::string m_fmt;
 		LOG::Level m_lvl;
+
+	private:
+		bool is_loaded(std::vector<std::shared_ptr<basesink>> sinks, std::shared_ptr<basesink> sink);
 	};
 
 	inline void print(std::string msg)

@@ -4,7 +4,8 @@
 
 namespace LOG
 {
-	ConsoleSink::ConsoleSink() :
+	ConsoleSink::ConsoleSink(std::string fmt) :
+		basesink(fmt),
 		console(new Console()) 
 	{
 

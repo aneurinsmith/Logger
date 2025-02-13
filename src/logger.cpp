@@ -1,16 +1,17 @@
 ﻿
 #include "logger.h"
 #include "timer.h"
-#include <iostream>
+#include <algorithm>
 
 namespace LOG 
 {
-	Logger::Logger(LOG::Level lvl, std::string fmt) : 
-		m_lvl(lvl), 
-		m_fmt(fmt) {}
-	Logger::Logger(std::shared_ptr<basesink> sink, LOG::Level lvl, std::string fmt) :
-		m_lvl(lvl),
-		m_fmt(fmt)
+	Logger::Logger(LOG::Level lvl) :
+		m_lvl(lvl)
+	{
+
+	}
+	Logger::Logger(std::shared_ptr<basesink> sink, LOG::Level lvl) :
+		m_lvl(lvl)
 	{
 		add_sink(sink);
 	}
@@ -24,38 +25,32 @@ namespace LOG
 	void Logger::set_level(LOG::Level lvl) 
 	{
 		m_lvl = lvl;
-		for (auto sink : sinks) {
-			sink->set_level(m_lvl);
-		}
-	}
-
-	void Logger::set_format(std::string fmt) 
-	{
-		m_fmt = fmt;
-		for (auto sink : sinks) {
-			sink->set_format(m_fmt);
-		}
 	}
 
 	void Logger::print(LOG::Level lvl, std::string msg) 
 	{
 		if (lvl >= m_lvl) {
-			Message m(msg, lvl, m_fmt);
-
-			for (auto sink : sinks) {
-				if (lvl >= sink->m_lvl) {
-					sink->write(m);
-				}
+			std::uint64_t epoch = Timer::get_epoch();
+			for (auto sink : m_sinks) {
+				sink->write(Message(msg, lvl, sink->m_fmt, epoch));
 			}
 		}
 	}
 
 	void Logger::add_sink(std::shared_ptr<basesink> sink) 
 	{
-		sink->set_level(m_lvl);
-		sink->set_format(m_fmt);
-		sinks.push_back(sink);
-		Logger::instance().sinks.push_back(sink);
+		if (!is_loaded(m_sinks, sink)) {
+			m_sinks.push_back(sink);
+		}
+		if (!is_loaded(Logger::instance().m_sinks, sink)) {
+			Logger::instance().m_sinks.push_back(sink);
+		}
 	}
 
+
+
+	bool Logger::is_loaded(std::vector<std::shared_ptr<basesink>> sinks, std::shared_ptr<basesink> sink)
+	{
+		return (bool)std::count(sinks.begin(), sinks.end(), sink);
+	}
 }

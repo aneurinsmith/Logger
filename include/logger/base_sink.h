@@ -77,18 +77,12 @@ namespace LOG
 	{
 		friend class Logger;
 
-	protected:
-		Level m_lvl;
-		std::string m_fmt;
+	public:
+		basesink(std::string fmt) :
+			m_fmt(fmt) {}
 
-		void set_level(LOG::Level lvl)
-		{
-			m_lvl = lvl;
-		}
-		void set_format(std::string fmt)
-		{
-			m_fmt = fmt;
-		}
+	protected:
+		std::string m_fmt;
 
 		virtual void write(Message msg) = 0;
 

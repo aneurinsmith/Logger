@@ -4,7 +4,8 @@
 
 namespace LOG
 {
-	FStreamSink::FStreamSink()
+	FStreamSink::FStreamSink(std::string fmt) :
+		basesink(fmt)
 	{
 		file.open("log.txt", std::ios::out);
 	}
