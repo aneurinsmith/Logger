@@ -7,8 +7,7 @@ namespace LOG
 	class OStreamSink : public basesink
 	{
 	public:
-		OStreamSink(std::string fmt) :
-			basesink(fmt) {}
+		OStreamSink(std::string fmt);
 
 	protected:
 		void write(Message);
