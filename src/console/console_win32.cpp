@@ -181,8 +181,9 @@ namespace LOG
 		SelectObject(memDC, memBM);
 
 		// Set background
-		HBRUSH brush = CreateSolidBrush(0x0C0C0C);
-		FillRect(memDC, &ps.rcPaint, brush);
+		HBRUSH bgBrush = CreateSolidBrush(0x0C0C0C);
+		HBRUSH lineBrush = CreateSolidBrush(0x333333);
+		FillRect(memDC, &ps.rcPaint, bgBrush);
 
 		// Create font
 		int dpi = GetDpiForWindow((HWND)handle);
@@ -194,9 +195,16 @@ namespace LOG
 		if (!msgs.empty()) {
 			int y = 1 - linePos;
 			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (int)(get_height()/16); ++it) {
-				
+
 				Message m = *it;
 				COLORREF textColor = 0xCCCCCC, bgColor = TRANSPARENT;
+
+				// Draw underscore if multiline
+				int line_count = m.get_fullString().size() * 8 / get_width();
+				if (line_count > 0) {
+					RECT line{ 0,(y + line_count) * 16,ps.rcPaint.right,((y + line_count) * 16) + 1 };
+					FillRect(memDC, &line, lineBrush);
+				}
 
 				int x = 0;
 				draw_text(memDC, m.get_tsString(), x, y, get_width(), get_height(), 0x767676);
@@ -228,8 +236,10 @@ namespace LOG
 
 				draw_text(memDC, m.get_lvlString(), x, y, get_width(), get_height(), textColor, bgColor);
 				draw_text(memDC, m.get_msgString(), x, y, get_width(), get_height(), 0xCCCCCC);
+
 				y++;
 			}
+
 		}
 		m.unlock();
 
@@ -238,7 +248,8 @@ namespace LOG
 		EndPaint((HWND)handle, &ps);
 
 		DeleteObject(hf);
-		DeleteObject(brush);
+		DeleteObject(bgBrush);
+		DeleteObject(lineBrush);
 		DeleteDC(memDC);
 		DeleteObject(memBM);
 	}

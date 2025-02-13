@@ -145,7 +145,7 @@ namespace LOG
 			}
 			if (y > 0) {
 				draw_mutex.lock();
-				XftDrawRect(draw, bgColor, (x * 8), ((y-1) * 16) + 2, chars_to_draw * 8, 16);
+				if(bgColor) XftDrawRect(draw, bgColor, (x * 8), ((y-1) * 16) + 2, chars_to_draw * 8, 16);
 				XftDrawStringUtf8(draw, textColor, font, (x * 8), (y * 16) - 2, (const XftChar8*)msg_substr.c_str(), msg_substr.size());
 				draw_mutex.unlock();
 			}
@@ -160,7 +160,7 @@ namespace LOG
 		Colormap cmap = DefaultColormap(dpy, scr);
 		Pixmap drawMem = XCreatePixmap(dpy, (Window)handle, get_width()+16, get_height(), 24);
 		XftDraw* draw = XftDrawCreate(dpy, drawMem, visual, cmap);
-		XftColor textColor, bgColor, lvlColor, sbColor, thumbColor;
+		XftColor textColor, bgColor, lvlColor, sbColor, thumbColor, lineColor;
 
 		// Set background
 		XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &bgColor);
@@ -178,18 +178,23 @@ namespace LOG
 				
 				Message m = *it;
 
+				// Draw underscore if multiline
+				int line_count = m.get_fullString().size() * 8 / get_width();
+				if (line_count > 0) {
+					XftColorAllocName(dpy, visual, cmap, "#333333", &lineColor);
+					XftDrawRect(draw, &lineColor, 0, (y+line_count) * 16, get_width(), 1);
+				}
+
 				int x = 0;
 				XftColorAllocName(dpy, visual, cmap, "#767676", &textColor);
-				draw_text(draw, font, m.get_tsString(), x, y, get_width(), get_height(), &textColor, &bgColor);
+				draw_text(draw, font, m.get_tsString(), x, y, get_width(), get_height(), &textColor);
 
 				switch (m.get_lvl()) {
 				case LOG::TRACE:
 					XftColorAllocName(dpy, visual, cmap, "#767676", &textColor);
-					XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &lvlColor);
 					break;
 				case LOG::DEBUG:
 					XftColorAllocName(dpy, visual, cmap, "#F2F2F2", &textColor);
-					XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &lvlColor);
 					break;
 				case LOG::INFO:
 					XftColorAllocName(dpy, visual, cmap, "#F2F2F2", &textColor);
@@ -209,10 +214,10 @@ namespace LOG
 					break;
 				}
 
-				draw_text(draw, font, m.get_lvlString(), x, y, get_width(), get_height(), &textColor, &lvlColor);
+				draw_text(draw, font, m.get_lvlString(), x, y, get_width(), get_height(), &textColor, m.get_lvl() > 2 ? &lvlColor : nullptr);
 
 				XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &textColor);
-				draw_text(draw, font, m.get_msgString(), x, y, get_width(), get_height(), &textColor, &bgColor);
+				draw_text(draw, font, m.get_msgString(), x, y, get_width(), get_height(), &textColor);
 				y++;
 			}
 		}
@@ -240,6 +245,7 @@ namespace LOG
 		XftColorFree(dpy, visual, cmap, &lvlColor);
 		XftColorFree(dpy, visual, cmap, &sbColor);
 		XftColorFree(dpy, visual, cmap, &thumbColor);
+		XftColorFree(dpy, visual, cmap, &lineColor);
 		XftDrawDestroy(draw);
 	}
 
