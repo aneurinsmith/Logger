@@ -200,7 +200,7 @@ namespace LOG
 				COLORREF textColor = 0xCCCCCC, bgColor = TRANSPARENT;
 
 				// Draw underscore if multiline
-				int line_count = m.get_fullString().size() * 8 / get_width();
+				int line_count = ((m.get_fullString().size() * 8) - 1) / get_width();
 				if (line_count > 0) {
 					RECT line{ 0,(y + line_count) * 16,ps.rcPaint.right,((y + line_count) * 16) + 1 };
 					FillRect(memDC, &line, lineBrush);

@@ -179,7 +179,7 @@ namespace LOG
 				Message m = *it;
 
 				// Draw underscore if multiline
-				int line_count = m.get_fullString().size() * 8 / get_width();
+				int line_count = ((m.get_fullString().size() * 8) - 1) / get_width();
 				if (line_count > 0) {
 					XftColorAllocName(dpy, visual, cmap, "#333333", &lineColor);
 					XftDrawRect(draw, &lineColor, 0, (y+line_count) * 16, get_width(), 1);
