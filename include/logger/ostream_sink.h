@@ -6,15 +6,12 @@ namespace LOG
 {
 	class OStreamSink : public basesink
 	{
-	public:
-		OStreamSink();
-
 	protected:
-		void print(Message);
+		void write(Message);
 
 	};
 
-	inline std::shared_ptr<OStreamSink> oStreamSink(LOG::Level lvl = (Level)0, std::string fmt = "%Y/%m/%d %H:%M:%S.%f")
+	inline std::shared_ptr<OStreamSink> oStreamSink()
 	{
 		auto sink = std::make_shared<OStreamSink>();
 		return sink;

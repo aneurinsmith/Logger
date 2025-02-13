@@ -1,5 +1,6 @@
 
 #pragma once
+#include "timer.h"
 #include <sstream>
 #include <memory>
 
@@ -26,9 +27,21 @@ namespace LOG
 	class basesink
 	{
 		friend class Logger;
-	protected:
 
-		virtual void print(Message msg) = 0;
+	protected:
+		Level m_lvl;
+		std::string m_fmt;
+
+		void set_level(LOG::Level lvl)
+		{
+			m_lvl = lvl;
+		}
+		void set_format(std::string fmt)
+		{
+			m_fmt = fmt;
+		}
+
+		virtual void write(Message msg) = 0;
 
 	};
 }

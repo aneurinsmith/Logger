@@ -11,6 +11,7 @@
 #include <atomic>
 
 #ifdef win32
+	#define NOMINMAX
 	#define WIN32_LEAN_AND_MEAN
 	#define WINVER 0x0605
 	#include <Windows.h>
@@ -93,10 +94,10 @@ namespace LOG
 		{
 			m.lock();
 			if (!msgs.empty()) {
-				std::string topMsg = (*(msgs.begin() + msgsPos)).msg;
-				int topMsgHeight = topMsg.size() / (get_width() / 8);
+				std::string topMsg = get_topMsg();
+				int topMsgHeight = (topMsg.size() - 1) / (get_width() / 8);
 
-				if (msgsPos == MAX_QUEUE - 1) {
+				if (msgsPos == msgs.size()-1) {
 					if (linePos > topMsgHeight) {
 						linePos--;
 					}
@@ -112,6 +113,29 @@ namespace LOG
 
 
 
+		std::string get_topMsg()
+		{
+			Message m = *(msgs.begin() + msgsPos);
+			std::string log_level = "";
+
+			switch (m.lvl) {
+			case LOG::TRACE: log_level = "[TRACE]"; break;
+			case LOG::DEBUG: log_level = "[DEBUG]"; break;
+			case LOG::INFO:  log_level = " [INFO]"; break;
+			case LOG::WARN:  log_level = " [WARN]"; break;
+			case LOG::ERROR: log_level = "[ERROR]"; break;
+			case LOG::FATAL: log_level = "[FATAL]"; break;
+			}
+			if (m.lvl != LOG::NONE) m.msg = "  " + m.msg;
+
+			std::string tab = std::string(8 - (m.ts.length() % 8), ' ');
+			std::string msg = m.ts + tab + log_level + m.msg;
+
+			return msg;
+		}
+
+
+
 		// Scollbar methods and variables
 		int msgsPos = 0;
 		int linePos = 0;
@@ -120,14 +144,13 @@ namespace LOG
 		{
 			m.lock();
 			if (!msgs.empty()) {
-				std::string topMsg = (*(msgs.begin() + msgsPos)).msg;
-
 				if (linePos > 0) {
 					linePos--;
 				}
 				else if (msgsPos > 0) {
 					msgsPos--;
-					linePos = topMsg.size() / (get_width()/8);
+					std::string topMsg = get_topMsg();
+					linePos = (topMsg.size() - 1) / (get_width()/8);
 				}
 			}
 			m.unlock();
@@ -137,9 +160,8 @@ namespace LOG
 		{
 			m.lock();
 			if (!msgs.empty()) {
-				std::string topMsg = (*(msgs.begin() + msgsPos)).msg;
-
-				if (linePos < topMsg.size() / (get_width()/8)) {
+				std::string topMsg = get_topMsg();
+				if (linePos < (topMsg.size() - 1) / (get_width()/8)) {
 					linePos++;
 				}
 				else if (msgsPos < msgs.size() - 1) {
@@ -154,8 +176,8 @@ namespace LOG
 		{
 			m.lock();
 			if (!msgs.empty()) {
-				std::string topMsg = (*(msgs.begin() + msgsPos)).msg;
-				int topMsgHeight = topMsg.size() / (get_width()/8);
+				std::string topMsg = get_topMsg();
+				int topMsgHeight = (topMsg.size() - 1) / (get_width()/8);
 				float adjustedPos = (float)(MAX_QUEUE - 0.01) * ((float)scrollPos / 10000);
 
 				if (adjustedPos < msgs.size()) {
@@ -172,8 +194,8 @@ namespace LOG
 
 			m.lock();
 			if (!msgs.empty()) {
-				std::string topMsg = (*(msgs.begin() + msgsPos)).msg;
-				int topMsgHeight = (topMsg.size() / (get_width()/8)) + 1;
+				std::string topMsg = get_topMsg();
+				int topMsgHeight = ((topMsg.size() - 1) / (get_width()/8)) + 1;
 				scrollPos = ((float)(linePos+(msgsPos * topMsgHeight)) 
 							/ (((MAX_QUEUE - 1) * topMsgHeight) + (topMsgHeight - 1)))
 							* 10000;

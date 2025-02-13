@@ -24,42 +24,41 @@ namespace LOG
 	void Logger::set_level(LOG::Level lvl) 
 	{
 		m_lvl = lvl;
+		for (auto sink : sinks) {
+			sink->set_level(m_lvl);
+		}
 	}
 
 	void Logger::set_format(std::string fmt) 
 	{
 		m_fmt = fmt;
+		for (auto sink : sinks) {
+			sink->set_format(m_fmt);
+		}
 	}
 
 	void Logger::print(LOG::Level lvl, std::string msg) 
 	{
 		if (lvl >= m_lvl) {
-			std::string timestamp = Timer::get_datetime(m_fmt);
-			std::string log_level = "";
-
-			switch (lvl) {
-			case LOG::TRACE: log_level = "[TRACE]"; break;
-			case LOG::DEBUG: log_level = "[DEBUG]"; break;
-			case LOG::INFO:  log_level = " [INFO]"; break;
-			case LOG::WARN:  log_level = " [WARN]"; break;
-			case LOG::ERROR: log_level = "[ERROR]"; break;
-			case LOG::FATAL: log_level = "[FATAL]"; break;
-			case LOG::NONE: break;
-			}
-
 			Message m;
 			m.msg = msg;
 			m.lvl = lvl;
-			m.ts = Timer::get_datetime(m_fmt);
+
+			std::uint64_t epoch = Timer::get_epoch();
 
 			for (auto sink : sinks) {
-				sink->print(m);
+				if (lvl >= sink->m_lvl) {
+					m.ts = Timer::get_datetime(sink->m_fmt, epoch);
+					sink->write(m);
+				}
 			}
 		}
 	}
 
 	void Logger::add_sink(std::shared_ptr<basesink> sink) 
 	{
+		sink->set_level(m_lvl);
+		sink->set_format(m_fmt);
 		sinks.push_back(sink);
 		Logger::instance().sinks.push_back(sink);
 	}

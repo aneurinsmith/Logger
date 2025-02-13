@@ -9,7 +9,7 @@ namespace LOG
 		int x, y;
 		unsigned int width, height, border_width, depth;
 		XGetGeometry(dpy, (Window)handle, &root, &x, &y, &width, &height, &border_width, &depth);
-		return width;
+		return width - 16;
 	}
 
 	unsigned int Console::get_height()
@@ -131,20 +131,43 @@ namespace LOG
 
 
 	std::mutex draw_mutex;
+	void draw_text(XftDraw* draw, XftFont* font, std::string text,
+		int& x, int& y, int width, int height,
+		XftColor* textColor, XftColor* bgColor = nullptr)
+	{
+		for (int i = 0; i < text.size() && y <= (int)(height / 16);) {
+			int chars_to_draw = std::min((int)(text.size() - i), (int)((width / 8) - x));
+			std::string msg_substr = text.substr(i, chars_to_draw);
+
+			if (x >= (width / 8)) {
+				x = 0;
+				y++;
+			}
+			if (y > 0) {
+				draw_mutex.lock();
+				XftDrawRect(draw, bgColor, (x * 8), ((y-1) * 16) + 2, chars_to_draw * 8, 16);
+				XftDrawStringUtf8(draw, textColor, font, (x * 8), (y * 16) - 2, (const XftChar8*)msg_substr.c_str(), msg_substr.size());
+				draw_mutex.unlock();
+			}
+			x += chars_to_draw;
+			i += chars_to_draw;
+		}
+	}
+
 	void Console::on_draw()
 	{
 		Visual* visual = DefaultVisual(dpy, scr);
 		Colormap cmap = DefaultColormap(dpy, scr);
-		Pixmap drawMem = XCreatePixmap(dpy, (Window)handle, get_width(), get_height(), 24);
+		Pixmap drawMem = XCreatePixmap(dpy, (Window)handle, get_width()+16, get_height(), 24);
 		XftDraw* draw = XftDrawCreate(dpy, drawMem, visual, cmap);
-		XftColor color;
+		XftColor textColor, bgColor, lvlColor, sbColor, thumbColor;
 
 		// Set background
-		XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &color);
-		XftDrawRect(draw, &color, 0, 0, get_width(), get_height());
+		XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &bgColor);
+		XftDrawRect(draw, &bgColor, 0, 0, get_width()+16, get_height());
 
 		// Create font
-		XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &color);
+		XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &textColor);
 		XftFont* font = XftFontOpenName(dpy, 0, "Consolas:pixelsize=14");
 
 		// Render messages
@@ -152,38 +175,81 @@ namespace LOG
 		if (!msgs.empty()) {
 			int y = 1 - linePos;
 			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (int)(get_height()/16); ++it) {
+				
+				Message m = *it;
+				std::string lvl_text = "";
+				std::string tab = std::string(8 - (m.ts.length() % 8), ' ');
+				if (m.lvl != LOG::NONE) m.msg = "  " + m.msg;
 
-				std::string msg = (*it).msg;
-				for (int x = 0; x < msg.size() && y <= (int)(get_height()/16); x += ((get_width()-16)/8), y++) {
-					std::string msg_substr = msg.substr(x, ((get_width()-16)/8));
-					if (y > 0) {
-						draw_mutex.lock();
-						XftDrawStringUtf8(draw, &color, font, 0, (y * 16) - 2, (const XftChar8*)msg_substr.c_str(), msg_substr.size());
-						draw_mutex.unlock();
-					}
+				int x = 0;
+				XftColorAllocName(dpy, visual, cmap, "#767676", &textColor);
+				draw_text(draw, font, m.ts, x, y, get_width(), get_height(), &textColor, &bgColor);
+				draw_text(draw, font, tab, x, y, get_width(), get_height(), &textColor, &bgColor);
+
+				switch (m.lvl) {
+				case LOG::TRACE:
+					lvl_text = "[TRACE]";
+					XftColorAllocName(dpy, visual, cmap, "#767676", &textColor);
+					XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &lvlColor);
+					break;
+				case LOG::DEBUG:
+					lvl_text = "[DEBUG]";
+					XftColorAllocName(dpy, visual, cmap, "#F2F2F2", &textColor);
+					XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &lvlColor);
+					break;
+				case LOG::INFO:
+					lvl_text = " [INFO]";
+					XftColorAllocName(dpy, visual, cmap, "#F2F2F2", &textColor);
+					XftColorAllocName(dpy, visual, cmap, "#3A96DD", &lvlColor);
+					break;
+				case LOG::WARN:
+					lvl_text = " [WARN]";
+					XftColorAllocName(dpy, visual, cmap, "#0C0C0C", &textColor);
+					XftColorAllocName(dpy, visual, cmap, "#C19C00", &lvlColor);
+					break;
+				case LOG::ERROR:
+					lvl_text = "[ERROR]";
+					XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &textColor);
+					XftColorAllocName(dpy, visual, cmap, "#E74856", &lvlColor);
+					break;
+				case LOG::FATAL:
+					lvl_text = "[FATAL]";
+					XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &textColor);
+					XftColorAllocName(dpy, visual, cmap, "#C50F1F", &lvlColor);
+					break;
 				}
+
+				draw_text(draw, font, lvl_text, x, y, get_width(), get_height(), &textColor, &lvlColor);
+
+				XftColorAllocName(dpy, visual, cmap, "#CCCCCC", &textColor);
+				draw_text(draw, font, m.msg, x, y, get_width(), get_height(), &textColor, &bgColor);
+				y++;
 			}
 		}
 		m.unlock();
 
 		// Draw scrollbar
-		XftColorAllocName(dpy, visual, cmap, "#171717", &color);
-		XftDrawRect(draw, &color, 
-			get_width()-16, 0, 
+		XftColorAllocName(dpy, visual, cmap, "#171717", &sbColor);
+		XftDrawRect(draw, &sbColor,
+			get_width(), 0, 
 			16, get_height());
 
-		XftColorAllocName(dpy, visual, cmap, "#4D4D4D", &color);
-		XftDrawRect(draw, &color, 
-			get_width()-16, (get_height()-20) * (float)get_scrollPos()/10000, 
+		XftColorAllocName(dpy, visual, cmap, "#4D4D4D", &thumbColor);
+		XftDrawRect(draw, &thumbColor,
+			get_width(), (get_height()-20) * (float)get_scrollPos()/10000, 
 			16, 20);
 
 		// Swap buffers
-		XCopyArea(dpy, drawMem, (Window)handle, DefaultGC(dpy, scr), 0, 0, get_width(), get_height(), 0, 0);
+		XCopyArea(dpy, drawMem, (Window)handle, DefaultGC(dpy, scr), 0, 0, get_width()+16, get_height(), 0, 0);
 		XSetWindowBackgroundPixmap(dpy, (Window)handle, drawMem);
 
 		XftFontClose(dpy, font);
 		XFreePixmap(dpy, drawMem);
-		XftColorFree(dpy, visual, cmap, &color);
+		XftColorFree(dpy, visual, cmap, &textColor);
+		XftColorFree(dpy, visual, cmap, &bgColor);
+		XftColorFree(dpy, visual, cmap, &lvlColor);
+		XftColorFree(dpy, visual, cmap, &sbColor);
+		XftColorFree(dpy, visual, cmap, &thumbColor);
 		XftDrawDestroy(draw);
 	}
 

@@ -23,6 +23,7 @@ namespace LOG
 		void set_level(LOG::Level lvl);
 		void set_format(std::string fmt);
 
+		void newline();
 		void print(LOG::Level lvl, std::string msg);
 
 		void add_sink(std::shared_ptr<basesink> sink);

@@ -70,6 +70,7 @@ namespace LOG
 			SetScrollPos((HWND)data->handle, SB_VERT, data->get_scrollPos(), TRUE);
 			SetScrollRange((HWND)data->handle, SB_VERT, 0, 10000, FALSE);
 			InvalidateRect((HWND)data->handle, NULL, TRUE);
+
 			break;
 
 		case WM_ENTERSIZEMOVE:
@@ -141,6 +142,36 @@ namespace LOG
 
 
 
+	void draw_text(HDC hdc, const std::string& text, 
+		int& x, int& y, int width, int height, 
+		COLORREF textColor = 0xCCCCCC, COLORREF bgColor = TRANSPARENT)
+	{
+		SetTextColor(hdc, textColor);
+		if (bgColor != TRANSPARENT) {
+			SetBkMode(hdc, OPAQUE);
+			SetBkColor(hdc, bgColor);
+		}
+		else {
+			SetBkMode(hdc, TRANSPARENT);
+		}
+
+		for (int i = 0; i < text.size() && y <= (int)(height / 16);) {
+			int chars_to_draw = std::min((int)(text.size() - i), (int)((width / 8) - x));
+			std::string msg_substr = text.substr(i, chars_to_draw);
+
+			if (x >= width / 8) {
+				x = 0;
+				y++;
+			}
+			if (y > 0) {
+				RECT msg_rc = { x * 8, (y - 1) * 16,0,0 };
+				DrawTextA(hdc, (LPCSTR)msg_substr.c_str(), -1, &msg_rc, DT_TOP | DT_NOCLIP);
+			}
+			x += chars_to_draw;
+			i += chars_to_draw;
+		}
+	}
+
 	void Console::on_draw()
 	{
 		PAINTSTRUCT ps;
@@ -157,24 +188,57 @@ namespace LOG
 		int dpi = GetDpiForWindow((HWND)handle);
 		HFONT hf = CreateFontA((14 * dpi) / 72, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, CLIP_DEFAULT_PRECIS, 0, CLEARTYPE_QUALITY, FF_DONTCARE, (LPCSTR)"Consolas");
 		SelectObject(memDC, hf);
-		SetBkMode(memDC, TRANSPARENT);
-		SetTextColor(memDC, 0xCCCCCC);
 
 		// Render messages
 		m.lock();
 		if (!msgs.empty()) {
 			int y = 1 - linePos;
 			for (auto it = msgs.begin() + msgsPos; it != msgs.end() && y <= (int)(get_height()/16); ++it) {
+				
+				Message m = *it;
+				std::string lvl_text = "";
+				std::string tab = std::string(8 - (m.ts.length() % 8), ' ');
+				if (m.lvl != LOG::NONE) m.msg = "  " + m.msg;
+				COLORREF textColor = 0xCCCCCC, bgColor = TRANSPARENT;
 
-				std::string msg = (*it).msg;
-				for (int x = 0; x < msg.size() && y <= (int)(get_height()/16); x += (get_width()/8), y++) {
-					std::string msg_substr = msg.substr(x, (get_width()/8));
-					if (y > 0) {
-						RECT msg_rc = { 0,(y - 1) * 16,0,0 };
-						DrawTextA(memDC, (LPCSTR)msg_substr.c_str(), -1, &msg_rc, DT_TOP | DT_NOCLIP);
-					}
+				int x = 0;
+				draw_text(memDC, m.ts, x, y, get_width(), get_height(), 0x767676);
+				draw_text(memDC, tab, x, y, get_width(), get_height());
+
+				switch (m.lvl) {
+				case LOG::TRACE:
+					lvl_text = "[TRACE]";
+					textColor = 0x767676;
+					break;
+				case LOG::DEBUG:
+					lvl_text = "[DEBUG]";
+					textColor = 0xF2F2F2;
+					break;
+				case LOG::INFO:
+					lvl_text = " [INFO]";
+					textColor = 0xF2F2F2;
+					bgColor = 0xDD963A;
+					break;
+				case LOG::WARN:
+					lvl_text = " [WARN]";
+					textColor = 0x0C0C0C;
+					bgColor = 0x009CC1;
+					break;
+				case LOG::ERROR:
+					lvl_text = "[ERROR]";
+					textColor = 0xCCCCCC;
+					bgColor = 0x5648E7;
+					break;
+				case LOG::FATAL:
+					lvl_text = "[FATAL]";
+					textColor = 0xCCCCCC;
+					bgColor = 0x1F0FC5;
+					break;
 				}
 
+				draw_text(memDC, lvl_text, x, y, get_width(), get_height(), textColor, bgColor);
+				draw_text(memDC, m.msg, x, y, get_width(), get_height(), 0xCCCCCC);
+				y++;
 			}
 		}
 		m.unlock();

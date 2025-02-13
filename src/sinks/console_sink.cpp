@@ -4,13 +4,13 @@
 
 namespace LOG
 {
-	ConsoleSink::ConsoleSink() : 
+	ConsoleSink::ConsoleSink() :
 		console(new Console()) 
 	{
 
 	}
 
-	void ConsoleSink::print(Message msg)
+	void ConsoleSink::write(Message msg)
 	{
 		console->push(msg);
 	}

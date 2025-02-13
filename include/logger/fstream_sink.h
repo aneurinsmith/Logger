@@ -1,6 +1,7 @@
 
 #pragma once
 #include "base_sink.h"
+#include <fstream>
 
 namespace LOG
 {
@@ -8,13 +9,17 @@ namespace LOG
 	{
 	public:
 		FStreamSink();
+		~FStreamSink();
 
 	protected:
-		void print(Message);
+		void write(Message);
+
+	private:
+		std::fstream file;
 
 	};
 
-	inline std::shared_ptr<FStreamSink> fStreamSink(LOG::Level lvl = (Level)0, std::string fmt = "%Y/%m/%d %H:%M:%S.%f")
+	inline std::shared_ptr<FStreamSink> fStreamSink()
 	{
 		auto sink = std::make_shared<FStreamSink>();
 		return sink;

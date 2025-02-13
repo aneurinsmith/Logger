@@ -11,13 +11,13 @@ namespace LOG
 		ConsoleSink();
 
 	protected:
-		void print(Message);
+		void write(Message);
 
 	private:
 		Console* console;
 	};
 
-	inline std::shared_ptr<ConsoleSink> consoleSink(LOG::Level lvl = (Level)0, std::string fmt = "%Y/%m/%d %H:%M:%S.%f")
+	inline std::shared_ptr<ConsoleSink> consoleSink()
 	{
 		auto sink = std::make_shared<ConsoleSink>();
 		return sink;
