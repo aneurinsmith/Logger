@@ -32,7 +32,7 @@ namespace LOG
 
 			if (lvl >= m_lvl) {
 				std::uint64_t epoch = Timer::get_epoch();
-				for (auto sink : m_sinks) {
+				for (const auto& sink : m_sinks) {
 					sink->write(Message(stream.str(), lvl, sink->m_fmt, epoch));
 				}
 			}
