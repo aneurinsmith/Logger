@@ -7,8 +7,6 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include_directories("include/logger")
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(LOGGER_VERSION 1.0.0)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
@@ -49,6 +47,9 @@ target_include_directories(logger
 
 # add platform definition to targets file
 target_compile_definitions(logger INTERFACE ${PLATFORM})
+
+# set c++ version to 17
+target_compile_features(logger PUBLIC cxx_std_17)
 
 # link platform libraries to logger
 if(PLATFORM STREQUAL "win32")
