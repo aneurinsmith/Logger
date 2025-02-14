@@ -7,7 +7,7 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include_directories("include/logger")
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(LOGGER_VERSION 1.0.0)
 
