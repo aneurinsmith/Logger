@@ -96,14 +96,14 @@ namespace LOG
 		isUpdateScheduled = false;
 		WNDCLASSEXA wcea = {};
 
-		if (!GetClassInfoExA(GetModuleHandleA(NULL), (LPCSTR)WINDOW_NAME, &wcea)) {
-			wcea.cbSize = sizeof(WNDCLASSEXW);
+		if (!GetClassInfoExA(GetModuleHandleA(NULL), (LPCSTR)WINDOW_NAME.c_str(), &wcea)) {
+			wcea.cbSize = sizeof(WNDCLASSEXA);
 			wcea.lpfnWndProc = HandleMessage;
 			wcea.cbClsExtra = 0;
 			wcea.cbWndExtra = 0;
 			wcea.hInstance = GetModuleHandleA(NULL);
 			wcea.hCursor = LoadCursor(NULL, IDC_ARROW);
-			wcea.lpszClassName = (LPCSTR)WINDOW_NAME;
+			wcea.lpszClassName = (LPCSTR)WINDOW_NAME.c_str();
 			wcea.style = CS_BYTEALIGNWINDOW | CS_DBLCLKS;
 
 			if (!RegisterClassExA(&wcea)) {
@@ -112,7 +112,7 @@ namespace LOG
 		}
 
 		handle = CreateWindowExA(0,
-			(LPCSTR)WINDOW_NAME, (LPCSTR)WINDOW_NAME,
+			(LPCSTR)WINDOW_NAME.c_str(), (LPCSTR)WINDOW_NAME.c_str(),
 			WS_OVERLAPPEDWINDOW |  WS_VISIBLE | WS_VSCROLL,
 			CW_USEDEFAULT, CW_USEDEFAULT,
 			600, 400,

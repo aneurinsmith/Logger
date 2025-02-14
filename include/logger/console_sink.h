@@ -8,7 +8,7 @@ namespace LOG
 	class ConsoleSink : public basesink
 	{
 	public:
-		ConsoleSink(std::string fmt);
+		ConsoleSink(std::string name, int size, std::string fmt);
 
 	protected:
 		void write(Message);
@@ -17,9 +17,9 @@ namespace LOG
 		Console* console;
 	};
 
-	inline std::shared_ptr<ConsoleSink> consoleSink(std::string fmt = "%Y/%m/%d %H:%M:%S.%f")
+	inline std::shared_ptr<ConsoleSink> consoleSink(std::string name = "", int size = 100, std::string fmt = "%Y/%m/%d %H:%M:%S.%f")
 	{
-		auto sink = std::make_shared<ConsoleSink>(fmt);
+		auto sink = std::make_shared<ConsoleSink>(name, size, fmt);
 		return sink;
 	}
 }

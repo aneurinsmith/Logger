@@ -9,7 +9,7 @@ LOG::Logger ossLogger(LOG::oStreamSink());
 int main()
 {
     ossLogger.print(LOG::TRACE, "app start");
-    consoleLogger.add_sink(LOG::consoleSink());
+    consoleLogger.add_sink(LOG::consoleSink("test", 20));
     consoleLogger.add_sink(LOG::consoleSink());
 
     std::this_thread::sleep_for(std::chrono::seconds(1));

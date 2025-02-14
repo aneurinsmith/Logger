@@ -30,8 +30,17 @@ namespace LOG
 	{
 	public:
 
-		Console()
+		Console(std::string name = "", int size = 100)
 		{
+			std::stringstream stream;
+			stream << "Log Viewer";
+			if (!name.empty()) {
+				stream << " [" << name.c_str() << "]";
+			}
+
+			WINDOW_NAME = stream.str();
+			MAX_QUEUE = size;
+
 			std::unique_lock<std::mutex> lk(m);
 			thread = std::thread(&Console::ThreadStart, this);
 			cv.wait(lk);
@@ -61,8 +70,8 @@ namespace LOG
 
 		// Window methods and variables
 		void* handle;
-		const unsigned int MAX_QUEUE = 100;
-		const char* WINDOW_NAME = "Log Viewer";
+		unsigned int MAX_QUEUE;
+		std::string WINDOW_NAME;
 
 		std::atomic<bool> isUpdateScheduled;
 	#ifdef libx11
