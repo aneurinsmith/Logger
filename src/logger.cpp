@@ -6,7 +6,7 @@
 namespace LOG 
 {
 	Logger::Logger() :
-		m_lvl(NONE) {}
+		Logger(NONE) {}
 	Logger::Logger(LOG::Level lvl) :
 		m_lvl(lvl) {}
 	Logger::Logger(std::shared_ptr<basesink> sink) :
@@ -17,9 +17,11 @@ namespace LOG
 		add_sink(sink);
 	}
 
+
+
 	Logger& Logger::instance() 
 	{
-		static Logger s_logger;
+		static Logger s_logger(LOG::oStreamSink());
 		return s_logger;
 	}
 
@@ -32,9 +34,6 @@ namespace LOG
 	{
 		if (!is_loaded(m_sinks, sink)) {
 			m_sinks.push_back(sink);
-		}
-		if (!is_loaded(Logger::instance().m_sinks, sink)) {
-			Logger::instance().m_sinks.push_back(sink);
 		}
 	}
 
