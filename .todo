@@ -1,7 +1,2 @@
 
-Fix message timestamp discrepency (issue on github)
-
-Allow loggers to be named
-	Allow fstream name to be used as the output directory
-
-Improve fStreamSink
+Allow a variadic constructor for the logger which will take multiple sinks in one go.
