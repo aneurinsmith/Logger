@@ -157,7 +157,7 @@
                 },
                 {
                     "name": "CMAKE_CXX_FLAGS",
-                    "value": "-m64 -std=c++17",
+                    "value": "-m64",
                     "type": "STRING"
                 }
             ]
@@ -187,7 +187,7 @@
                 },
                 {
                     "name": "CMAKE_CXX_FLAGS",
-                    "value": "-m32 -std=c++17",
+                    "value": "-m32",
                     "type": "STRING"
                 }
             ]
@@ -217,7 +217,7 @@
                 },
                 {
                     "name": "CMAKE_CXX_FLAGS",
-                    "value": "-m64 -std=c++17 -D__STRICT_ANSI__",
+                    "value": "-m64 -D__STRICT_ANSI__",
                     "type": "STRING"
                 }
             ]
@@ -247,7 +247,7 @@
                 },
                 {
                     "name": "CMAKE_CXX_FLAGS",
-                    "value": "-m32 -std=c++17 -D__STRICT_ANSI__",
+                    "value": "-m32 -D__STRICT_ANSI__",
                     "type": "STRING"
                 }
             ]

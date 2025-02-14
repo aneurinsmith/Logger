@@ -17,7 +17,6 @@ namespace LOG
 	private:
 		std::string m_name;
 		std::ofstream m_file;
-
 	};
 
 	inline std::shared_ptr<FStreamSink> fStreamSink(std::string name = "", std::string fmt = "%Y/%m/%d %H:%M:%S.%f")

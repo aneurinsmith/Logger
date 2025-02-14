@@ -85,6 +85,5 @@ namespace LOG
 		std::string m_fmt;
 
 		virtual void write(Message msg) = 0;
-
 	};
 }

@@ -16,4 +16,6 @@ int main()
 	std::cout << "Time elapsed: " << timer.stop() << std::endl;
 
 	std::cout << LOG::Timer::get_datetime();
+
+	return 0;
 }

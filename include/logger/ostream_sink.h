@@ -11,7 +11,6 @@ namespace LOG
 
 	protected:
 		void write(Message);
-
 	};
 
 	inline std::shared_ptr<OStreamSink> oStreamSink(std::string fmt = "%Y/%m/%d %H:%M:%S.%f")

@@ -26,5 +26,6 @@ int main()
     ossLogger.print(LOG::TRACE, "time taken (ms): ", timer.stop());
 
     std::this_thread::sleep_for(std::chrono::minutes(10));
+
     return 0;
 }

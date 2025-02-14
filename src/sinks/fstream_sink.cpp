@@ -3,7 +3,6 @@
 #include "timer.h"
 #include <iostream>
 #include <iomanip>
-#include <filesystem>
 
 #ifdef win32
 	#include <windows.h>

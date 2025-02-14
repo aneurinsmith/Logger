@@ -40,7 +40,6 @@ namespace LOG
 			}
 		}
 
-
 		void add_sink(std::shared_ptr<basesink> sink);
 
 	protected:
@@ -92,5 +91,4 @@ namespace LOG
 	{
 		Logger::instance().print(FATAL, msgs...);
 	}
-
 }
