@@ -240,7 +240,7 @@ namespace LOG
 		XCopyArea(dpy, drawMem, (Window)handle, DefaultGC(dpy, scr), 0, 0, get_width()+16, get_height(), 0, 0);
 		XSetWindowBackgroundPixmap(dpy, (Window)handle, drawMem);
 
-		XftFontClose(dpy, font);
+		if(font) XftFontClose(dpy, font);
 		XFreePixmap(dpy, drawMem);
 		XftColorFree(dpy, visual, cmap, &textColor);
 		XftColorFree(dpy, visual, cmap, &bgColor);
