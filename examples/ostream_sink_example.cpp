@@ -7,13 +7,13 @@ LOG::Logger logger2;
 
 int main() 
 {
-    auto oss1 = LOG::oStreamSink();
+    auto oss = LOG::oStreamSink();
     auto cs = LOG::consoleSink("console", 100, "%B %d %Y %H:%M");
-
-    logger1.add_sink(oss1);
-    logger1.add_sink(cs);
     logger2.add_sink(cs);
-    logger2.print(LOG::INFO, "The console logger has a different datetime format");
+    logger2.print(LOG::INFO, "This console logger has a different datetime format");
+
+    logger1.add_sink(oss);
+    logger1.add_sink(cs);
     logger1.print(LOG::NONE, "Multiple sinks can be added to a logger");
 
     logger1.set_level(LOG::NONE);
@@ -22,7 +22,7 @@ int main()
     logger1.print(LOG::NONE, "At this level, only fatal message will be shown");
     logger1.set_level(LOG::NONE);
 
-    LOG::print("All sinks that are added to a logger can be logged to using the inline funtions");
+    LOG::print("The default logger, which can be accessed through the inline functions, is also an oStreamSink");
 
     LOG::print("none");
     LOG::trace("trace");
