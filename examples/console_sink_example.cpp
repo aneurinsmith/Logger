@@ -3,7 +3,7 @@
 #include <timer.h>
 #include <thread>
 
-LOG::Logger consoleLogger;
+LOG::Logger consoleLogger(LOG::TRACE);
 LOG::Logger ossLogger(LOG::oStreamSink());
 
 int main()
@@ -23,9 +23,8 @@ int main()
         consoleLogger.print(LOG::TRACE, msg);
     }
     ossLogger.print(LOG::TRACE, "done");
-    ossLogger.print(LOG::TRACE, "time taken (ms): " + std::to_string(timer.stop()));
+    ossLogger.print(LOG::TRACE, "time taken (ms): ", timer.stop());
 
     std::this_thread::sleep_for(std::chrono::minutes(10));
-
     return 0;
 }
