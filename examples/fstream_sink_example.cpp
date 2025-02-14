@@ -3,7 +3,6 @@
 #include <thread>
 
 LOG::Logger logger(LOG::fStreamSink("session"));
-LOG::Logger ossLogger(LOG::oStreamSink());
 
 int main()
 {

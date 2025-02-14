@@ -3,27 +3,25 @@
 #include <timer.h>
 #include <thread>
 
-LOG::Logger consoleLogger(LOG::TRACE);
-LOG::Logger ossLogger(LOG::oStreamSink());
+LOG::Logger consoleLogger(LOG::INFO, LOG::consoleSink("INFO"));
 
 int main()
 {
-    ossLogger.print(LOG::TRACE, "app start");
+    LOG::trace("app start");
     consoleLogger.add_sink(LOG::consoleSink("test", 20));
-    consoleLogger.add_sink(LOG::consoleSink());
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
     LOG::Timer timer;
     timer.start();
-    ossLogger.print(LOG::TRACE, "we are now looping");
+    LOG::trace("we are now looping");
     for (int i = 0; i < 10000; i++) {
         std::string msg = "Terminal window message ";
         msg += std::to_string(i);
-        consoleLogger.print(LOG::TRACE, msg);
+        consoleLogger.print(LOG::INFO, msg);
     }
-    ossLogger.print(LOG::TRACE, "done");
-    ossLogger.print(LOG::TRACE, "time taken (ms): ", timer.stop());
+    LOG::trace("done");
+    LOG::trace("time taken (ms): ", timer.stop());
 
     std::this_thread::sleep_for(std::chrono::minutes(10));
 
