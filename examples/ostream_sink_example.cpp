@@ -8,7 +8,7 @@ LOG::Logger logger2;
 int main() 
 {
     auto oss1 = LOG::oStreamSink();
-    auto cs = LOG::consoleSink("%B %d %Y %H:%M");
+    auto cs = LOG::consoleSink("console", 100, "%B %d %Y %H:%M");
 
     logger1.add_sink(oss1);
     logger1.add_sink(cs);
