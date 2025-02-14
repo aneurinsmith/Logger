@@ -95,7 +95,7 @@ namespace LOG
 		handle = (void*)XCreateSimpleWindow(
 			dpy, root,
 			0, 0,
-			600, 400,
+			800, 400,
 			0, 0, 0);
 		if (!handle) {
 			throw std::runtime_error("Could not create the window");

@@ -115,7 +115,7 @@ namespace LOG
 			(LPCSTR)WINDOW_NAME.c_str(), (LPCSTR)WINDOW_NAME.c_str(),
 			WS_OVERLAPPEDWINDOW |  WS_VISIBLE | WS_VSCROLL,
 			CW_USEDEFAULT, CW_USEDEFAULT,
-			600, 400,
+			800, 400,
 			0, (HMENU)0, GetModuleHandleA(NULL), (void*)this);
 		if (!handle) {
 			throw std::runtime_error("Window creation failed");
