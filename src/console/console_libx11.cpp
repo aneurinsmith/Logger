@@ -101,6 +101,8 @@ namespace LOG
 			throw std::runtime_error("Could not create the window");
 		}
 
+		XStoreName(dpy, (Window)handle, WINDOW_NAME.c_str());
+
 		XSelectInput(dpy, (Window)handle, ButtonPressMask | ButtonReleaseMask | ButtonMotionMask | ExposureMask | StructureNotifyMask);
 		XMapWindow(dpy, (Window)handle);
 		Atom wm_delete_window = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
