@@ -10,7 +10,9 @@ namespace LOG
 	{
 
 	}
-	Logger::Logger(std::shared_ptr<basesink> sink, LOG::Level lvl) :
+	Logger::Logger(std::shared_ptr<basesink> sink) :
+		Logger(NONE, sink) {}
+	Logger::Logger(LOG::Level lvl, std::shared_ptr<basesink> sink) :
 		m_lvl(lvl)
 	{
 		add_sink(sink);
