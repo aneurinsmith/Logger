@@ -27,16 +27,6 @@ namespace LOG
 		m_lvl = lvl;
 	}
 
-	void Logger::print(LOG::Level lvl, std::string msg) 
-	{
-		if (lvl >= m_lvl) {
-			std::uint64_t epoch = Timer::get_epoch();
-			for (auto sink : m_sinks) {
-				sink->write(Message(msg, lvl, sink->m_fmt, epoch));
-			}
-		}
-	}
-
 	void Logger::add_sink(std::shared_ptr<basesink> sink) 
 	{
 		if (!is_loaded(m_sinks, sink)) {
