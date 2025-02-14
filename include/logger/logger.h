@@ -15,7 +15,8 @@ namespace LOG
 	{
 	public:
 
-		Logger(LOG::Level lvl = (Level)0);
+		Logger();
+		Logger(LOG::Level lvl);
 		Logger(std::shared_ptr<basesink> sink);
 		Logger(LOG::Level lvl, std::shared_ptr<basesink> sink);
 
