@@ -28,11 +28,7 @@ namespace LOG
 		void print(LOG::Level lvl, Args... msgs)
 		{
 			std::stringstream stream;
-			using List = int[];
-			(void)List
-			{
-				0, ((void)(stream << msgs), 0)...
-			};
+			(..., (stream << msgs));
 
 			if (lvl >= m_lvl) {
 				std::uint64_t epoch = Timer::get_epoch();
@@ -53,6 +49,10 @@ namespace LOG
 		bool is_loaded(std::vector<std::shared_ptr<basesink>> sinks, std::shared_ptr<basesink> sink);
 	};
 
+	inline void set_level(Level lvl)
+	{
+		Logger::instance().set_level(lvl);
+	}
 	template<typename... Args>
 	inline void print(Args... msgs)
 	{
