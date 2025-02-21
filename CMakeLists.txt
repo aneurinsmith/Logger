@@ -23,6 +23,8 @@ if(NOT PLATFORM)
 		set(PLATFORM "win32")
 	elseif(UNIX AND NOT APPLE)
 		set(PLATFORM "libx11")
+	else()
+		message(FATAL_ERROR "Platform is unsuppored")
 	endif()
 	message(STATUS "Platform detected: ${PLATFORM}")
 	add_compile_definitions(${PLATFORM})
@@ -34,22 +36,29 @@ endif()
 #  LIBRARY CREATION  #
 #--------------------#
 
+# get the relevent source files
+file(GLOB_RECURSE logger_src "src/*.h" "src/*.cpp")
+
 # create the liblogger library
-file(GLOB_RECURSE logger_src "src/*.cpp")
 add_library (logger STATIC ${logger_src})
 
 # set include directory for header files
 target_include_directories(logger 
-	INTERFACE
+	PUBLIC
 	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/logger>"
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/logger>"
 )
 
 # add platform definition to targets file
-target_compile_definitions(logger INTERFACE ${PLATFORM})
+target_compile_definitions(logger PUBLIC ${PLATFORM})
 
 # set c++ version to 17
 target_compile_features(logger PUBLIC cxx_std_17)
+
+# set compile tags to suppress warnings
+target_compile_options(logger PUBLIC "-std=c++17")
+target_compile_options(logger PUBLIC "-Wno-macro-redefined")
+target_compile_options(logger PUBLIC "-Wno-switch")
 
 # link platform libraries to logger
 if(PLATFORM STREQUAL "win32")
@@ -60,6 +69,7 @@ elseif(PLATFORM STREQUAL "libx11")
 	target_link_libraries(logger -lX11)
 	target_link_libraries(logger -lXft)
 	target_link_libraries(logger -lXrandr)
+	target_link_libraries(logger -lpthread)
 endif()
 
 
