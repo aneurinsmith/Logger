@@ -7,7 +7,10 @@
 
 namespace LOG
 {
-	Timer::Timer(EpochUnit unit) : m_unit(unit) {}
+	Timer::Timer(EpochUnit unit) : m_unit(unit) 
+	{
+		start_epoch = get_epoch(m_unit);
+	}
 
 	void Timer::start()
 	{
@@ -30,7 +33,7 @@ namespace LOG
 		using namespace std::chrono;
 		auto now = system_clock::now();
 		auto duration = now.time_since_epoch();
-		return duration.count() / unit;
+		return duration.count() / (std::uint64_t)unit;
 	}
 
 
