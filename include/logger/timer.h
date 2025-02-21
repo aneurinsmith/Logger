@@ -5,7 +5,7 @@
 
 namespace LOG 
 {
-	enum class EpochUnit
+	enum EpochUnit
 	{
 		SECONDS = 1000000000,
 		MILLISECONDS = 1000000,
@@ -15,12 +15,12 @@ namespace LOG
 	class Timer
 	{
 	public:
-		Timer(EpochUnit unit = EpochUnit::MILLISECONDS);
+		Timer(EpochUnit unit = MILLISECONDS);
 
 		void start();
 		std::uint64_t stop();
 
-		static std::uint64_t get_epoch(EpochUnit unit = EpochUnit::MILLISECONDS);
+		static std::uint64_t get_epoch(EpochUnit unit = MILLISECONDS);
 		static std::string get_datetime(std::string fmt = "%Y/%m/%d %H:%M:%S.%f", std::uint64_t epoch = get_epoch());
 
 	private:
