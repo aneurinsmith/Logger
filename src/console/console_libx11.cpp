@@ -122,7 +122,7 @@ namespace LOG
 	void Console::update()
 	{
 		if (!isUpdateScheduled.exchange(true)) {
-			XEvent ex;
+			XEvent ex = {};
 			ex.type = Expose;
 			ex.xexpose.window = (Window)handle;
 			XSendEvent(dpy, (Window)handle, False, ExposureMask, &ex);
