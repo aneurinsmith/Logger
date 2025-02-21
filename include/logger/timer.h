@@ -5,23 +5,22 @@
 
 namespace LOG 
 {
-	enum EpochUnit
+	enum class EpochUnit
 	{
 		SECONDS = 1000000000,
 		MILLISECONDS = 1000000,
-		MICROSECONDS = 1000,
-		NANOSECONDS = 1
+		MICROSECONDS = 1000
 	};
 
 	class Timer
 	{
 	public:
-		Timer(EpochUnit unit = MILLISECONDS);
+		Timer(EpochUnit unit = EpochUnit::MILLISECONDS);
 
 		void start();
 		std::uint64_t stop();
 
-		static std::uint64_t get_epoch(EpochUnit unit = MILLISECONDS);
+		static std::uint64_t get_epoch(EpochUnit unit = EpochUnit::MILLISECONDS);
 		static std::string get_datetime(std::string fmt = "%Y/%m/%d %H:%M:%S.%f", std::uint64_t epoch = get_epoch());
 
 	private:
