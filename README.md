@@ -3,20 +3,37 @@
 [![build (linux)](https://img.shields.io/github/actions/workflow/status/aneurinsmith/Logger/build-linux.yml?logo=ubuntu&logoColor=white)](https://github.com/aneurinsmith/Logger/actions/workflows/build-linux.yml)
 [![release](https://img.shields.io/github/v/release/aneurinsmith/Logger.svg?style=flat)](https://github.com/aneurinsmith/Logger/releases/latest)
 
-## CMake dependency
+##
+Requires `libx11-dev`, `libxft-dev`, and `libxrandr-dev` when compiling on linux.\
+Tested on x86 and x64 using ninja-build, wsl, and clang++.
 
-The full list of releases can be found [here](https://github.com/aneurinsmith/Logger/releases).\
-_CMake version 3.12 is required_. 
-```
-include(FetchContent)
-FetchContent_Declare(logger URL https://github.com/aneurinsmith/Logger/releases/download/v0.2.1/logger-src.zip)
-FetchContent_MakeAvailable(logger)
+<br>
+
+## CMake Dependency
+
+The full list of releases can be found [here](https://github.com/aneurinsmith/Logger/releases).
+```cmake
+FetchContent_Declare(logger 
+	URL https://github.com/aneurinsmith/Logger/releases/download/v1.0.1/logger-src.zip
+	DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
 ```
 
-## Output sinks
+<sub>_CMake version 3.12 is required_.</sub>\
+<sub>_C++ version 17 is required_.</sub>
+
+<br>
+
+## Output Sinks
 
 Each output sink has a corresponding inline factory for easy instantiation.
- * `LOG::fStreamSink`
- * `LOG::oStreamSink`
- * `LOG::consoleSink`
+ *  ```c++
+    LOG::fStreamSink(name, fmt)
+    ```
+ *  ```c++
+    LOG::oStreamSink(fmt)
+    ```
+ *  ```c++
+    LOG::consoleSink(name, size, fmt)
+    ```
 
