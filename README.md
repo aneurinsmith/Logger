@@ -5,7 +5,7 @@
 
 ##
 Requires `libx11-dev`, `libxft-dev`, and `libxrandr-dev` when compiling on linux.\
-Tested on x86 and x64 using ninja-build, wsl, and clang++.
+Tested on x86 and x64 using ninja-build, wsl (ubuntu 18.04), and clang++.
 
 <br>
 
