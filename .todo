@@ -1,2 +1,3 @@
 
 Allow a variadic constructor for the logger which will take multiple sinks in one go.
+Improve DPI awareness for multiple displays
