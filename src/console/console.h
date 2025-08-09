@@ -104,7 +104,8 @@ namespace LOG
 			m.lock();
 			if (!msgs.empty()) {
 				std::string topMsg = get_topMsg();
-				int topMsgHeight = (topMsg.size() - 1) / (get_width() / 8);
+
+				int topMsgHeight = (topMsg.size() - 1) / (double)((get_width()+1) / 8);
 
 				if (msgsPos == msgs.size()-1) {
 					if (linePos > topMsgHeight) {
@@ -144,7 +145,7 @@ namespace LOG
 				else if (msgsPos > 0) {
 					msgsPos--;
 					std::string topMsg = get_topMsg();
-					linePos = (topMsg.size() - 1) / (get_width()/8);
+					linePos = (topMsg.size() - 1) / (double)((get_width()+1) / 8);
 				}
 			}
 			m.unlock();
@@ -155,7 +156,7 @@ namespace LOG
 			m.lock();
 			if (!msgs.empty()) {
 				std::string topMsg = get_topMsg();
-				if (linePos < (topMsg.size() - 1) / (get_width()/8)) {
+				if (linePos < (topMsg.size() - 1) / (double)((get_width() + 1) / 8)) {
 					linePos++;
 				}
 				else if (msgsPos < msgs.size() - 1) {
@@ -171,7 +172,7 @@ namespace LOG
 			m.lock();
 			if (!msgs.empty()) {
 				std::string topMsg = get_topMsg();
-				int topMsgHeight = (topMsg.size() - 1) / (get_width()/8);
+				int topMsgHeight = (topMsg.size() - 1) / (double)((get_width() + 1) / 8);
 				float adjustedPos = (float)(MAX_QUEUE - 0.01) * ((float)scrollPos / 10000);
 
 				if (adjustedPos < msgs.size()) {
@@ -189,7 +190,7 @@ namespace LOG
 			m.lock();
 			if (!msgs.empty()) {
 				std::string topMsg = get_topMsg();
-				int topMsgHeight = ((topMsg.size() - 1) / (get_width()/8)) + 1;
+				int topMsgHeight = ((topMsg.size() - 1) / (double)((get_width() + 1) / 8)) + 1;
 				scrollPos = ((float)(linePos+(msgsPos * topMsgHeight)) 
 							/ (((MAX_QUEUE - 1) * topMsgHeight) + (topMsgHeight - 1)))
 							* 10000;
